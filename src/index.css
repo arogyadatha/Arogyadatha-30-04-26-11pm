@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans: 'Poppins', 'Inter', 'Roboto', sans-serif;
+    --font-roboto: 'Roboto', sans-serif;
+    --primary: #059669;
+    --primary-foreground: #FFFFFF;
+    
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+
+    --animate-blink: blink 1s infinite;
+    --animate-fire-pulse: fire-pulse 2s infinite;
+    --animate-blink-available: blink-available 1.5s infinite;
+    --animate-blink-leave: blink-leave 1.5s infinite;
+    --animate-blink-emergency: blink-emergency 1s infinite;
+    --animate-blink-surgery: blink-surgery 1s infinite;
+    --animate-soft-emerald-pulse: soft-emerald-pulse 1.2s ease-in-out infinite;
+
+    @keyframes soft-emerald-pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes blink-available {
+      0%, 100% { opacity: 1; color: #10B981; text-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+      50% { opacity: 0.6; color: #059669; }
+    }
+
+    @keyframes blink-leave {
+      0%, 100% { opacity: 1; color: #EF4444; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes blink-emergency {
+      0%, 100% { opacity: 1; color: #F97316; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    @keyframes blink-surgery {
+      0%, 100% { opacity: 1; color: #EAB308; }
+      50% { opacity: 0.6; }
+    }
+
+    --animate-soft-pulse: soft-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+    @keyframes soft-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); border-color: #000000; box-shadow: 0 0 0 0 rgba(0,0,0,0.1); }
+      50% { opacity: 0.8; transform: scale(1.02); border-color: #10B981; box-shadow: 0 0 15px rgba(16,185,129,0.2); }
+    }
+}
+
+:root {
+    --background: #e6f4ef;
+    --foreground: #1F2937;
+    --card: rgba(255, 255, 255, 0.7);
+    --card-foreground: #1F2937;
+    --popover: #FFFFFF;
+    --popover-foreground: #1F2937;
+    --primary: #10B981;
+    --primary-foreground: #FFFFFF;
+    --secondary: #ECFDF5;
+    --secondary-foreground: #065F46;
+    --muted: #F3F4F6;
+    --muted-foreground: #6B7280;
+    --accent: #D1FAE5;
+    --accent-foreground: #065F46;
+    --destructive: #EF4444;
+    --destructive-foreground: #FAFAFA;
+    --border: #7fd3b6;
+    --input: #E5E7EB;
+    --ring: #059669;
+    --radius: 20px;
+}
+
+.dark {
+    --background: #111827;
+    --foreground: #F9FAFB;
+    --card: rgba(31, 41, 55, 0.7);
+    --card-foreground: #F9FAFB;
+    --popover: #1F2937;
+    --popover-foreground: #F9FAFB;
+    --primary: #10B981;
+    --primary-foreground: #FFFFFF;
+    --secondary: #374151;
+    --secondary-foreground: #D1FAE5;
+    --muted: #374151;
+    --muted-foreground: #9CA3AF;
+    --accent: #1F2937;
+    --accent-foreground: #10B981;
+    --destructive: #EF4444;
+    --destructive-foreground: #FAFAFA;
+    --border: #374151;
+    --input: #4B5563;
+    --ring: #10B981;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply text-foreground overflow-x-hidden min-h-screen transition-colors duration-100;
+    background: linear-gradient(135deg, #e6f4ef 0%, #d9f2ea 100%);
+    background-attachment: fixed;
+  }
+  
+  .dark body, body.dark {
+    background: #000000; /* Pure Black for Premium Dark Mode */
+    color: #FFFFFF;
+  }
+  html {
+    @apply font-sans overflow-x-hidden scroll-smooth;
+    font-size: 18px;
+    font-family: 'Inter', 'Roboto', sans-serif;
+  }
+
+  .dark * {
+    color: #FFFFFF;
+  }
+
+  .dark .text-muted-foreground {
+    color: #A1A1AA !important;
+  }
+  
+  ::selection {
+    background-color: #0B6B4F;
+    color: #FFFFFF;
+  }
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(6, 78, 59, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.no-wrap-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.horizontal-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min-content;
+  gap: 1rem;
+  align-items: center;
+}
+
+.glass-card {
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  border: 2.5px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-card {
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.health-journey-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(217, 242, 234, 0.4) 100%);
+  backdrop-filter: blur(12px);
+  border: 3px solid #7fd3b6;
+  border-radius: 22px;
+  box-shadow: 0px 8px 30px rgba(0, 150, 100, 0.2);
+}
+
+.hover-premium {
+  @apply transition-all duration-100 ease-in-out;
+}
+
+.hover-premium:hover {
+  background-color: #0B6B4F !important;
+  color: #FFFFFF !important;
+}
+
+.active-premium:active {
+  background-color: #0B6B4F !important;
+  color: #FFFFFF !important;
+}

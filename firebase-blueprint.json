@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Core user profile data stored in Firestore",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "fullName": { "type": "string" },
+        "role": { "type": "string", "enum": ["patient", "doctor", "lab", "pharmacy", "admin"] },
+        "phoneNumber": { "type": "string" },
+        "arogyadathaId": { "type": "string", "description": "Unique ID like PAT-001" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "dob": { "type": "string" },
+        "experience": { "type": "string" },
+        "registrationNumber": { "type": "string" },
+        "specialization": { "type": "string" },
+        "qualification": { "type": "string" },
+        "doctorType": { "type": "string", "enum": ["hospital", "independent"] },
+        "licenseNumber": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "labName": { "type": "string" },
+        "pharmacyName": { "type": "string" }
+      },
+      "required": ["uid", "email", "fullName", "role"]
+    },
+    "Case": {
+      "title": "Health Case",
+      "description": "A specific health issue or journey for a patient",
+      "type": "object",
+      "properties": {
+        "caseId": { "type": "string" },
+        "userId": { "type": "string" },
+        "caseName": { "type": "string" },
+        "symptoms": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "completed", "cancelled"] },
+        "appointments": { "type": "array", "items": { "type": "object" } },
+        "labRequests": { "type": "array", "items": { "type": "object" } },
+        "labReports": { "type": "array", "items": { "type": "object" } },
+        "pharmacyOrders": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["caseId", "userId", "caseName", "symptoms", "createdAt", "status"]
+    }
+  },
+  "firestore": {
+    "/patients/{patientId}": {
+      "schema": "UserProfile",
+      "description": "Patient profiles"
+    },
+    "/patients/{patientId}/cases/{caseId}": {
+      "schema": "Case",
+      "description": "Patient health cases"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "object",
+      "description": "Appointments linked to a case"
+    },
+    "/patients/{patientId}/cases/{caseId}/labRequests/{labRequestId}": {
+      "schema": "object",
+      "description": "Lab requests linked to a case"
+    },
+    "/patients/{patientId}/cases/{caseId}/labReports/{reportId}": {
+      "schema": "object",
+      "description": "Lab reports linked to a case"
+    },
+    "/patients/{patientId}/cases/{caseId}/pharmacyOrders/{orderId}": {
+      "schema": "object",
+      "description": "Pharmacy orders linked to a case"
+    },
+    "/doctors/{doctorId}": {
+      "schema": "UserProfile",
+      "description": "Doctor profiles"
+    },
+    "/labs/{labId}": {
+      "schema": "UserProfile",
+      "description": "Lab profiles"
+    },
+    "/pharmacies/{pharmacyId}": {
+      "schema": "UserProfile",
+      "description": "Pharmacy profiles"
+    },
+    "/admins/{adminId}": {
+      "schema": "UserProfile",
+      "description": "Admin profiles"
+    },
+    "/counters/{counterId}": {
+      "schema": "object",
+      "description": "Auto-increment counters for IDs"
+    }
+  }
+}

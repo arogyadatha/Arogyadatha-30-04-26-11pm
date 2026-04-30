@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: patients, doctors, labs, pharmacies, admins
+    // Document ID: {userId} (matches request.auth.uid)
+    //
+    // Patient Structure:
+    // patients/{patientId} {
+    //   patientId: string,
+    //   name: string,
+    //   phone: string,
+    //   createdAt: timestamp
+    // }
+    //
+    // Case Structure:
+    // patients/{patientId}/cases/{caseId} {
+    //   caseId: string,
+    //   caseName: string,
+    //   createdAt: timestamp,
+    //   status: string
+    // }
+    //
+    // Sub-collections inside Case:
+    // appointments, labRequests, labReports, pharmacyOrders
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (
+          (exists(/databases/$(database)/documents/admins/$(request.auth.uid))) ||
+          (request.auth.token.email == "arogyadatha24@gmail.com" && request.auth.token.email_verified == true)
+        );
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'fullName', 'role', 'arogyadathaId', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 100 &&
+             data.arogyadathaId is string && data.arogyadathaId.size() > 0 &&
+             data.role in ['patient', 'doctor', 'lab', 'pharmacy', 'admin'];
+    }
+
+    function isValidCase(data) {
+      return data.keys().hasAll(['caseId', 'userId', 'caseName', 'symptoms', 'createdAt', 'status']) &&
+             data.userId == request.auth.uid &&
+             data.caseName is string && data.caseName.size() > 0 && data.caseName.size() < 200 &&
+             data.symptoms is string && data.symptoms.size() > 0 && data.symptoms.size() < 2000 &&
+             data.status in ['active', 'completed', 'cancelled'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /patients/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      match /cases/{caseId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+        
+        match /labRequests/{id} { allow read, write: if isOwner(userId) || isAdmin(); }
+        match /labReports/{id} { allow read, write: if isOwner(userId) || isAdmin(); }
+        match /pharmacyOrders/{id} { allow read, write: if isOwner(userId) || isAdmin(); }
+      }
+    }
+
+    match /appointments/{patientId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /doctors/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /labs/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /pharmacies/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /admins/{userId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /counters/{counterId} {
+      allow read, write: if isAuthenticated(); 
+    }
+
+    match /doctor_feedback/{id} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.patient_id == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
