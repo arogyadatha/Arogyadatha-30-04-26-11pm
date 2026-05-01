@@ -91,7 +91,7 @@ import {
 import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 
-type AdminTab = 'dashboard' | 'doctors' | 'hospitals' | 'labs' | 'pharmacies' | 'patients' | 'appointments' | 'cases' | 'revenue' | 'subscriptions' | 'reports' | 'alerts' | 'settings' | 'ai' | 'audit-logs' | 'support';
+type AdminTab = 'dashboard' | 'doctors' | 'hospitals' | 'labs' | 'pharmacies' | 'patients' | 'appointments' | 'cases' | 'revenue' | 'subscriptions' | 'reports' | 'alerts' | 'settings' | 'ai' | 'audit-logs' | 'support' | 'landing-page';
 
 const firebaseConfig = {
   apiKey: "AIzaSyD5sTxlmdPFr2qjms3uganXKdgjizTlPpk",
@@ -171,6 +171,11 @@ export default function AdminDashboard({ user, onLogout }: { user: any; onLogout
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  
+  // Landing Page Management States
+  const [landingConfig, setLandingConfig] = useState<any>(null);
+  const [loadingLanding, setLoadingLanding] = useState(true);
+  const [isSavingLanding, setIsSavingLanding] = useState(false);
 
   const geocodeAddress = async (address: string) => {
     try {
@@ -280,6 +285,22 @@ export default function AdminDashboard({ user, onLogout }: { user: any; onLogout
     } catch (e) {
       toast.dismiss();
       toast.error("Failed to save record");
+    }
+  };
+
+  const handleSaveLanding = async (newConfig: any) => {
+    setIsSavingLanding(true);
+    try {
+      await setDoc(doc(db, 'landing_page_config', 'main'), {
+        ...newConfig,
+        lastUpdated: serverTimestamp()
+      }, { merge: true });
+      toast.success("Landing Page updated successfully!");
+    } catch (e) {
+      console.error("Save Error:", e);
+      toast.error("Failed to update Landing Page");
+    } finally {
+      setIsSavingLanding(false);
     }
   };
 
@@ -476,6 +497,45 @@ export default function AdminDashboard({ user, onLogout }: { user: any; onLogout
       }),
       onSnapshot(collection(db, 'counters'), (snap) => {
         if (!snap.empty) setCounters(snap.docs[0].data());
+      }),
+      onSnapshot(doc(db, 'landing_page_config', 'main'), (snap) => {
+        if (snap.exists()) {
+          setLandingConfig(snap.data());
+        } else {
+          // Initialize with defaults if not exists
+          const defaults = {
+            isEnabled: true,
+            headings: {
+              hero: "ONE HEALTH ID. ONE PLACE. FULL JOURNEY.",
+              whatWeDo: "WHAT WE DO",
+              services: "Our Services",
+              ai: "Personalized AI",
+              impact: "Impact & Growth"
+            },
+            contentBlocks: {
+              heroDesc: "Don't leave your health data in hospitals. Carry your health data in your mobile.",
+              whatWeDoDesc: "We help people manage their complete health in one place."
+            },
+            contactInfo: {
+              phoneNumbers: ["8008334948"],
+              emails: ["Arogyadatha24@gmail.com"],
+              address: "Guntur, Andhra Pradesh, India"
+            },
+            buttons: {
+              heroCta: "JOIN AROGYADATHA COMMUNITY",
+              heroCtaLink: "https://chat.whatsapp.com/CsvbKgcYB3qE2dMpSxNoAR?mode=gi_t",
+              navbarLogin: "Login",
+              signUpCta: "Create Your Health ID",
+              whatsappSupport: "WHATSAPP SUPPORT",
+              collabCta: "Submit Collaboration Request",
+              messageAdminCta: "Message Admin"
+            },
+            teamMembers: [],
+            lastUpdated: serverTimestamp()
+          };
+          setLandingConfig(defaults);
+        }
+        setLoadingLanding(false);
       })
     ];
     return () => unsubs.forEach(unsub => unsub());
@@ -869,6 +929,7 @@ export default function AdminDashboard({ user, onLogout }: { user: any; onLogout
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
     { id: 'ai', label: 'AI Insights', icon: Brain },
     { id: 'audit-logs', label: 'Audit Logs', icon: History },
+    { id: 'landing-page', label: 'Landing Page', icon: Globe },
     { id: 'support', label: 'Support', icon: HelpCircle },
   ];
 
@@ -1393,6 +1454,263 @@ export default function AdminDashboard({ user, onLogout }: { user: any; onLogout
                     </tbody>
                   </table>
                 </div>
+              </Card>
+            </div>
+          ) : activeTab === 'landing-page' ? (
+            <div className="animate-in slide-in-from-bottom-4 duration-500 h-full space-y-6">
+              <Card className="border-none shadow-sm rounded-3xl bg-white p-6 lg:p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Landing Page Manager</h2>
+                    <p className="text-xs font-medium text-slate-500 mt-1">Control visibility and content of your public landing page.</p>
+                  </div>
+                  <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl border border-slate-100">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Status:</span>
+                    <button 
+                      onClick={() => handleSaveLanding({ isEnabled: !landingConfig?.isEnabled })}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${landingConfig?.isEnabled ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-slate-200 text-slate-600'}`}
+                    >
+                      {landingConfig?.isEnabled ? 'Publicly Enabled' : 'Hidden / Disabled'}
+                    </button>
+                  </div>
+                </div>
+
+                {loadingLanding ? (
+                  <div className="py-20 text-center animate-pulse">
+                    <Globe className="w-10 h-10 text-emerald-200 mx-auto mb-4" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Loading Configuration...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Headings & Text */}
+                    <div className="space-y-6">
+                      <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 space-y-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><FileText className="w-4 h-4 text-emerald-600" /></div>
+                          <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Core Headings</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hero Title</label>
+                            <Input 
+                              value={landingConfig?.headings?.hero || ''} 
+                              onChange={(e) => setLandingConfig({...landingConfig, headings: {...landingConfig.headings, hero: e.target.value}})}
+                              className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hero Description</label>
+                            <textarea 
+                              value={landingConfig?.contentBlocks?.heroDesc || ''} 
+                              onChange={(e) => setLandingConfig({...landingConfig, contentBlocks: {...landingConfig.contentBlocks, heroDesc: e.target.value}})}
+                              className="w-full min-h-[80px] p-4 rounded-xl bg-white border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">What We Do Title</label>
+                              <Input 
+                                value={landingConfig?.headings?.whatWeDo || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, headings: {...landingConfig.headings, whatWeDo: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">AI Section Title</label>
+                              <Input 
+                                value={landingConfig?.headings?.ai || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, headings: {...landingConfig.headings, ai: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 space-y-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><Zap className="w-4 h-4 text-emerald-600" /></div>
+                          <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Buttons & CTAs</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hero CTA Text</label>
+                              <Input 
+                                value={landingConfig?.buttons?.heroCta || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, heroCta: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hero CTA Link</label>
+                              <Input 
+                                value={landingConfig?.buttons?.heroCtaLink || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, heroCtaLink: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sign Up Button</label>
+                              <Input 
+                                value={landingConfig?.buttons?.signUpCta || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, signUpCta: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp Support</label>
+                              <Input 
+                                value={landingConfig?.buttons?.whatsappSupport || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, whatsappSupport: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Collab Request Button</label>
+                              <Input 
+                                value={landingConfig?.buttons?.collabCta || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, collabCta: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Message Admin Button</label>
+                              <Input 
+                                value={landingConfig?.buttons?.messageAdminCta || ''} 
+                                onChange={(e) => setLandingConfig({...landingConfig, buttons: {...landingConfig.buttons, messageAdminCta: e.target.value}})}
+                                className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 space-y-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><Mail className="w-4 h-4 text-emerald-600" /></div>
+                          <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Contact Information</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Numbers (Comma separated)</label>
+                            <Input 
+                              value={landingConfig?.contactInfo?.phoneNumbers?.join(', ') || ''} 
+                              onChange={(e) => setLandingConfig({...landingConfig, contactInfo: {...landingConfig.contactInfo, phoneNumbers: e.target.value.split(',').map((s:any) => s.trim())}})}
+                              className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Addresses (Comma separated)</label>
+                            <Input 
+                              value={landingConfig?.contactInfo?.emails?.join(', ') || ''} 
+                              onChange={(e) => setLandingConfig({...landingConfig, contactInfo: {...landingConfig.contactInfo, emails: e.target.value.split(',').map((s:any) => s.trim())}})}
+                              className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Office Address</label>
+                            <Input 
+                              value={landingConfig?.contactInfo?.address || ''} 
+                              onChange={(e) => setLandingConfig({...landingConfig, contactInfo: {...landingConfig.contactInfo, address: e.target.value}})}
+                              className="h-11 rounded-xl bg-white border-slate-200 text-xs font-bold"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Team & Save */}
+                    <div className="space-y-6 flex flex-col">
+                      <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 flex-1">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><Users className="w-4 h-4 text-emerald-600" /></div>
+                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">Team Members</h3>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setLandingConfig({...landingConfig, teamMembers: [...(landingConfig.teamMembers || []), {name: 'New Member', role: 'Role', image: ''}]})}
+                            className="h-8 rounded-lg text-[10px] font-black border-emerald-100 text-emerald-600"
+                          >
+                            <Plus className="w-3 h-3 mr-1" /> ADD
+                          </Button>
+                        </div>
+
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar pr-2">
+                          {(landingConfig?.teamMembers || []).map((member: any, idx: number) => (
+                            <div key={idx} className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden">
+                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="flex-1 grid grid-cols-2 gap-2">
+                                <Input 
+                                  value={member.name} 
+                                  onChange={(e) => {
+                                    const newTeam = [...landingConfig.teamMembers];
+                                    newTeam[idx].name = e.target.value;
+                                    setLandingConfig({...landingConfig, teamMembers: newTeam});
+                                  }}
+                                  placeholder="Name"
+                                  className="h-9 rounded-lg text-[11px] font-bold"
+                                />
+                                <Input 
+                                  value={member.role} 
+                                  onChange={(e) => {
+                                    const newTeam = [...landingConfig.teamMembers];
+                                    newTeam[idx].role = e.target.value;
+                                    setLandingConfig({...landingConfig, teamMembers: newTeam});
+                                  }}
+                                  placeholder="Role"
+                                  className="h-9 rounded-lg text-[11px] font-bold"
+                                />
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  const newTeam = landingConfig.teamMembers.filter((_:any, i:number) => i !== idx);
+                                  setLandingConfig({...landingConfig, teamMembers: newTeam});
+                                }}
+                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                          {(landingConfig?.teamMembers || []).length === 0 && (
+                            <div className="text-center py-10 border-2 border-dashed border-slate-100 rounded-3xl">
+                              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Team Members Added</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-8 bg-emerald-600 rounded-[32px] text-white space-y-4 shadow-xl shadow-emerald-900/20">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center"><Zap className="w-5 h-5 text-white" /></div>
+                          <div>
+                            <h4 className="text-lg font-black tracking-tight leading-none">Apply Changes</h4>
+                            <p className="text-[10px] font-medium text-emerald-100 uppercase tracking-widest mt-1">Updates are Instant & Global</p>
+                          </div>
+                        </div>
+                        <Button 
+                          onClick={() => handleSaveLanding(landingConfig)}
+                          disabled={isSavingLanding}
+                          className="w-full h-14 bg-white hover:bg-emerald-50 text-emerald-600 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-black/10 active:scale-95 transition-all"
+                        >
+                          {isSavingLanding ? 'Saving Updates...' : 'Publish to Live Site'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           ) : (

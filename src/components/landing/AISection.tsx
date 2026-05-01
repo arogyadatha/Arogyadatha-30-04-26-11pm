@@ -13,7 +13,14 @@ import {
   Activity 
 } from "lucide-react";
 
-export function AISection() {
+export function AISection({ config }: { config?: any }) {
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str.toLowerCase().split(' ').map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+  };
+
   const points = [
     { 
       icon: FileText, 
@@ -73,45 +80,47 @@ export function AISection() {
   ];
 
   return (
-    <section id="ai" className="py-12 bg-white border-t border-gray-100">
-      <div className="container mx-auto px-6">
-        <div className="max-w-4xl space-y-8 text-left mb-10">
-          <div className="space-y-2">
-            <h2 className="text-[#059669] font-black text-lg uppercase tracking-[0.2em] border-l-4 border-[#1FD73D] pl-4">Personalized AI</h2>
-            <p className="text-2xl md:text-3xl font-black text-[#111111] leading-tight">
-              AI Native integration for a smarter health journey.
+    <section id="ai" className="py-8 bg-white border-t border-gray-100">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="w-full space-y-4 text-left">
+          <div className="space-y-1">
+            <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4">
+              {toTitleCase(config?.headings?.ai || "Personalized Ai")}
+            </h2>
+            <p className="text-base md:text-xl font-bold text-[#111111]/80 leading-tight pl-4">
+              {config?.contentBlocks?.aiDesc || "AI Native integration for a smarter health journey."}
             </p>
           </div>
-
-          <div className="flex flex-col gap-4">
+ 
+          <div className="flex flex-col gap-3 pl-4">
             {points.map((point, i) => (
-              <div key={i} className="flex items-start gap-4 py-2 group">
-                <div className="w-10 h-10 rounded-xl bg-[#059669]/5 flex items-center justify-center shrink-0 border border-[#059669]/10 group-hover:bg-[#059669] group-hover:border-[#059669] transition-all duration-300">
-                  <point.icon className="w-5 h-5 text-[#059669] group-hover:text-white transition-colors" />
+              <div key={i} className="flex items-start gap-4 group">
+                <div className="w-6 h-6 rounded bg-[#064e3b]/5 flex items-center justify-center shrink-0 border border-[#064e3b]/10 group-hover:bg-[#064e3b] group-hover:border-[#064e3b] transition-all duration-300 mt-1">
+                  <point.icon className="w-3.5 h-3.5 text-[#064e3b] group-hover:text-white transition-colors" />
                 </div>
-                <div className="space-y-1">
-                  <h4 className="text-lg md:text-xl font-black text-[#111111] uppercase tracking-tight">
-                    {point.title}
+                <div className="space-y-0.5">
+                  <h4 className="text-sm md:text-lg font-black text-[#111111] tracking-tight leading-none">
+                    {toTitleCase(point.title)}
                   </h4>
-                  <p className="text-base md:text-lg text-gray-500 font-bold leading-snug">
+                  <p className="text-[11px] md:text-sm text-[#111111]/70 font-bold leading-tight">
                     {point.text}
                   </p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="w-full p-8 rounded-2xl bg-emerald-50 text-[#059669] space-y-4 border border-[#059669]/10 shadow-sm">
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6 text-[#1FD73D]" />
-            <p className="text-[clamp(14px,2.7vw,22px)] font-black uppercase tracking-tight">
-              One AI. One history. Full control of your health.
+ 
+          <div className="mt-6 p-4 rounded-2xl bg-[#064e3b] text-white shadow-xl overflow-hidden ml-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-white animate-pulse shrink-0" />
+              <p className="text-xs md:text-base font-black tracking-tight">
+                {toTitleCase("One Ai. One History. Full Control Of Your Health.")}
+              </p>
+            </div>
+            <p className="mt-1 text-[10px] md:text-xs font-bold italic leading-tight text-white/70">
+              Simple, clear health support — made for every person. We leverage advanced GenAI to ensure every patient understands their health status.
             </p>
           </div>
-          <p className="text-sm md:text-base font-bold italic leading-relaxed text-gray-600">
-            Simple, clear health support — made for every person. We leverage advanced GenAI to ensure every patient understands their health status.
-          </p>
         </div>
       </div>
     </section>

@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { XCircle, CheckCircle2 } from "lucide-react";
 
 interface ProblemSolutionProps {
   onSignUpClick?: () => void;
+  config?: any;
 }
 
-export function ProblemSolution({ onSignUpClick }: ProblemSolutionProps) {
+export function ProblemSolution({ onSignUpClick, config }: ProblemSolutionProps) {
+  const [activeTab, setActiveTab] = useState<'problem' | 'solution'>('problem');
+
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str.toLowerCase().split(' ').map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+  };
+
   const problems = [
     "Long waiting time in hospitals",
     "Patients don't understand disease clearly",
@@ -27,57 +37,109 @@ export function ProblemSolution({ onSignUpClick }: ProblemSolutionProps) {
   return (
     <section id="solutions" className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#111111]">
-            Bridging the Gap in <span className="text-[#059669]">Indian Healthcare</span>
+        <div className="text-center max-w-5xl mx-auto mb-6 space-y-1">
+          <h2 className="text-[clamp(12px,4.5vw,32px)] font-black text-[#111111] tracking-tighter whitespace-nowrap">
+            {toTitleCase("Bridging the Gap in")} <span className="text-[#064e3b]">{toTitleCase("Indian Healthcare")}</span>
           </h2>
-          <p className="text-gray-500 text-lg">
-            Lack of clarity + lack of continuity = bad treatment. We are changing that equation.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Problem Section */}
-          <div className="space-y-8">
-            <h3 className="text-2xl font-bold text-red-600 flex items-center gap-2">
-              <XCircle className="w-6 h-6" /> The Problem
-            </h3>
-            <div className="space-y-4">
-              {problems.map((problem, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-red-50/50 border border-red-100">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-red-600 flex-shrink-0" />
-                  <span className="text-[#111111] font-medium">{problem}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Solution Section */}
-          <div className="space-y-8">
-            <h3 className="text-2xl font-bold text-[#059669] flex items-center gap-2">
-              <CheckCircle2 className="w-6 h-6" /> Our Solution
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {solutions.map((sol, i) => (
-                <div key={i} className="p-5 rounded-xl bg-emerald-50/50 border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="font-bold text-[#059669] mb-1">{sol.title}</div>
-                  <p className="text-sm text-gray-500">{sol.desc}</p>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-0.5">
+            <p className="text-[clamp(9px,3vw,16px)] text-[#111111]/90 font-black tracking-tight whitespace-nowrap">
+              {toTitleCase("Lack Of Clarity + Lack Of Continuity = Bad Treatment.")}
+            </p>
+            <p className="text-[clamp(10px,3.2vw,18px)] text-[#064e3b] font-black tracking-tight whitespace-nowrap">
+              {toTitleCase("We Are Changing That Equation.")}
+            </p>
           </div>
         </div>
 
-        <div className="mt-20 p-8 md:p-12 rounded-3xl bg-[#059669] text-white flex flex-col md:flex-row items-center justify-between gap-8">
+        {/* Simple Tab Bar - Colored & Condensed */}
+        <div className="max-w-xl mx-auto mb-6">
+          <div className="flex p-1 bg-gray-100/50 rounded-2xl border border-gray-100">
+            <button 
+              onClick={() => setActiveTab('problem')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black tracking-widest text-[10px] transition-all ${
+                activeTab === 'problem' 
+                ? 'bg-red-600 text-white shadow-lg' 
+                : 'bg-red-50 text-red-700 hover:bg-red-100'
+              }`}
+            >
+              <XCircle className="w-3.5 h-3.5" /> {toTitleCase("The Problem")}
+            </button>
+            <button 
+              onClick={() => setActiveTab('solution')}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black tracking-widest text-[10px] transition-all ${
+                activeTab === 'solution' 
+                ? 'bg-emerald-900 text-white shadow-lg' 
+                : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> {toTitleCase("Our Solution")}
+            </button>
+          </div>
+        </div>
+
+        {/* Content Section - Colored Container & Low Height */}
+        <div className="max-w-2xl mx-auto">
+          <div className={`p-4 sm:p-6 rounded-[32px] border transition-all duration-500 animate-in fade-in zoom-in-95 ${
+            activeTab === 'problem' 
+            ? 'bg-red-50/50 border-red-100' 
+            : 'bg-emerald-50/50 border-emerald-100'
+          }`}>
+            {activeTab === 'problem' ? (
+              <div className="space-y-1.5">
+                {problems.map((problem, i) => (
+                  <div key={i} className="flex items-center gap-3 py-1 border-b border-red-100/30 last:border-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                    <span className="text-xs md:text-sm font-bold text-red-900 tracking-tight">{problem}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {solutions.map((sol, i) => (
+                  <div key={i} className="flex items-start gap-4 py-1 border-b border-emerald-100/30 last:border-0">
+                    <div className="mt-1 w-3.5 h-3.5 rounded bg-emerald-900/10 flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-900" />
+                    </div>
+                    <div className="space-y-0">
+                      <h4 className="text-xs md:text-sm font-black text-emerald-900 tracking-tight leading-none">{toTitleCase(sol.title)}</h4>
+                      <p className="text-[10px] md:text-[11px] text-emerald-800/70 font-bold italic">{sol.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Combined Master CTA Box */}
+        <div className="mt-10 p-6 md:p-10 rounded-[40px] bg-[#064e3b] text-white shadow-2xl border-b-8 border-black/20 flex flex-col items-center text-center space-y-6">
+          
+          {/* Top Taglines */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 opacity-80">
+            {["NO CONFUSION.", "NO LOST REPORTS.", "NO REPEATED TESTS."].map((text, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#1FD73D]" />
+                <span className="text-[10px] md:text-xs font-bold tracking-[0.2em]">{toTitleCase(text)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Main Messaging */}
           <div className="space-y-2">
-            <h4 className="text-2xl md:text-3xl font-bold">Ready to take control?</h4>
-            <p className="text-white/80">Join Arogyadatha today and experience the future of healthcare.</p>
+            <h4 className="text-3xl md:text-5xl font-bold tracking-tighter leading-none">
+              {toTitleCase("Ready to take control?")}
+            </h4>
+            <p className="text-sm md:text-lg text-white/80 font-bold italic leading-tight max-w-xl mx-auto">
+              Join Arogyadatha today and experience the future of healthcare.
+            </p>
           </div>
+
+          {/* Action Button */}
           <button 
             onClick={onSignUpClick}
-            className="whitespace-nowrap px-8 py-4 bg-[#1FD73D] text-white font-bold rounded-xl shadow-lg shadow-black/10 hover:scale-105 transition-transform"
+            className="group relative flex items-center justify-center px-10 py-4 bg-white text-[#064e3b] font-bold tracking-widest text-[11px] md:text-sm rounded-2xl shadow-xl hover:bg-gray-50 transition-all active:scale-95 border-none"
           >
-            Create Your Health ID
+            {toTitleCase(config?.buttons?.signUpCta || "Create Your Health ID")}
           </button>
         </div>
       </div>

@@ -55,13 +55,12 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
-  getDocFromServer,
+  getDocs,
   runTransaction,
+  onSnapshot,
   collection,
   query,
-  where,
-  getDocs,
-  onSnapshot
+  where
 } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast, Toaster } from 'sonner';
@@ -125,6 +124,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
 export default function App() {
   const [view, setView] = useState<'landing' | 'hero' | 'role-selection' | 'signup' | 'login' | 'dashboard' | 'symptom-checker' | 'book-doctor' | 'book-lab' | 'pharmacy' | 'profile' | 'settings' | 'privacy' | 'terms'>('landing');
+  const [landingConfig, setLandingConfig] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -761,6 +761,24 @@ export default function App() {
   const [adminCode, setAdminCode] = useState('');
 
   useEffect(() => {
+    const fetchLandingConfig = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'landing_page_config', 'main'));
+        if (snap.exists()) {
+          const config = snap.data();
+          setLandingConfig(config);
+          if (config.isEnabled === false && view === 'landing') {
+            setView('login');
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch landing config:", e);
+      }
+    };
+    fetchLandingConfig();
+  }, []);
+
+  useEffect(() => {
     setPersistence(auth, browserLocalPersistence);
     let profileUnsubscribe: (() => void) | null = null;
 
@@ -1308,7 +1326,7 @@ export default function App() {
   };
 
   return (
-    <div className={`h-screen overflow-hidden ${isDarkMode ? 'dark bg-slate-950' : 'bg-[#F0F9F4]'} font-sans relative flex flex-col`}>
+    <div className={`${['landing', 'hero', 'role-selection', 'signup', 'login'].includes(view) ? 'min-h-screen' : 'h-screen overflow-hidden'} ${isDarkMode ? 'dark bg-slate-950' : 'bg-[#F0F9F4]'} font-sans relative flex flex-col`}>
       <Toaster position="top-center" richColors />
 
       <AnimatePresence mode="wait">

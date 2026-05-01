@@ -13,9 +13,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export function FounderContact() {
+export function FounderContact({ config }: { config?: any }) {
   const ADMIN_PHONE = "918008334948";
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str.toLowerCase().split(' ').map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,79 +36,85 @@ export function FounderContact() {
     { name: "YouTube", icon: Youtube, color: "bg-[#FF0000]", href: "https://youtube.com/@arogyadatha" },
     { name: "Facebook", icon: Facebook, color: "bg-[#1877F2]", href: "https://www.facebook.com/share/18Gsxdcvdp/" },
     { name: "Instagram", icon: Instagram, color: "bg-[#E4405F]", href: "https://www.instagram.com/arogyadatha" },
-    { name: "WhatsApp", icon: MessageCircle, color: "bg-[#25D366]", href: `https://wa.me/${ADMIN_PHONE}` },
+    { name: "WhatsApp", icon: MessageCircle, color: "bg-[#064e3b]", href: config?.buttons?.heroCtaLink || `https://wa.me/${ADMIN_PHONE}` },
   ];
 
   return (
-    <section id="team" className="py-20 bg-white overflow-hidden border-t border-gray-100">
+    <section id="team" className="py-12 bg-white overflow-hidden border-t border-gray-100">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           
           {/* Left Column: Team Members */}
-          <div className="space-y-12">
-            <div className="space-y-4">
-              <h2 className="text-4xl font-black text-[#111111] uppercase tracking-tighter">Our Team Members</h2>
-              <div className="w-20 h-1.5 bg-[#1FD73D] rounded-full" />
+          <div className="space-y-10">
+            <div className="space-y-2">
+              <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
+                {toTitleCase("Our Team Members")}
+              </h2>
             </div>
 
             {/* Founder Profile */}
-            <div className="space-y-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-6">
                 <div className="relative shrink-0">
-                  <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#1FD73D] shadow-2xl z-10 relative">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#064e3b] shadow-xl z-10 relative">
                     <img 
                       src="/assets/images/founder.png" 
                       alt="Chinta Lokesh Babu" 
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="absolute -bottom-2 -right-2 w-40 h-40 bg-[#1FD73D]/10 rounded-full blur-2xl -z-10" />
                 </div>
 
-                <div className="text-center sm:text-left pt-4">
-                  <h3 className="text-4xl md:text-5xl font-black text-[#111111] uppercase tracking-tighter leading-none mb-3">
-                    Chinta Lokesh B
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-2xl md:text-4xl font-black text-[#111111] tracking-tighter leading-none mb-1">
+                    {toTitleCase("Chinta Lokesh Babu")}
                   </h3>
-                  <p className="text-[#059669] font-black text-xs md:text-sm uppercase tracking-[0.2em]">
-                    Founder, Arogyadatha
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[#064e3b] font-black text-xs tracking-[0.1em]">
+                      {toTitleCase("Founder, Arogyadatha")}
+                    </p>
+                    <div className="flex items-center gap-2 text-gray-500 font-bold text-sm">
+                      <Phone className="w-3.5 h-3.5 text-[#064e3b]" />
+                      <span>8008334948</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-8 rounded-[32px] bg-gray-50 border-l-8 border-[#1FD73D] shadow-sm">
-                <p className="text-gray-500 italic font-bold leading-relaxed text-lg">
+              <div className="p-4 rounded-2xl bg-gray-50 border-l-4 border-[#064e3b] shadow-sm">
+                <p className="text-gray-500 italic font-bold leading-tight text-sm">
                   "I faced real problems in healthcare. This idea comes from real life. This is not just a startup. This is a solution for people."
                 </p>
               </div>
             </div>
 
             {/* Rishi Profile */}
-            <div className="pt-10 border-t border-gray-100 space-y-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#1FD73D] shadow-xl">
+            <div className="pt-8 border-t border-gray-100 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#064e3b] shrink-0">
                   <img 
                     src="https://picsum.photos/seed/rishi/400/400" 
                     alt="V.V.Vijaya Bhaskar (Rishi)" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="text-center sm:text-left pt-2">
-                  <h3 className="text-3xl font-black text-[#111111] uppercase tracking-tighter leading-none mb-2">
-                    V.V.Vijaya Bhaskar (Rishi)
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-black text-[#111111] tracking-tighter leading-none mb-1 truncate">
+                    {toTitleCase("V.V.Vijaya Bhaskar (Rishi)")}
                   </h3>
-                  <div className="flex flex-col gap-1">
-                    <p className="text-[#059669] font-black text-[10px] uppercase tracking-[0.2em]">
-                      Developer
+                  <div className="flex items-center gap-3">
+                    <p className="text-[#064e3b] font-black text-[9px] tracking-[0.1em]">
+                      {toTitleCase("Developer")}
                     </p>
-                    <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-400 font-bold text-xs">
-                      <Phone className="w-3 h-3 text-[#1FD73D]" />
+                    <div className="flex items-center gap-1.5 text-gray-400 font-bold text-[10px]">
+                      <Phone className="w-2.5 h-2.5 text-[#064e3b]" />
                       <span>7993611399</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="p-6 rounded-[24px] bg-gray-50 border-l-4 border-[#1FD73D] shadow-sm">
-                <p className="text-gray-500 italic font-bold text-sm leading-relaxed">
+              <div className="p-4 rounded-xl bg-gray-50 border-l-4 border-[#064e3b] shadow-sm">
+                <p className="text-gray-500 italic font-bold text-xs leading-tight">
                   "I like the vision and project goals from the beginning which made me inspired to come hands with the project."
                 </p>
               </div>
@@ -109,89 +122,92 @@ export function FounderContact() {
           </div>
 
           {/* Right Column: Contact & Social */}
-          <div className="space-y-16 lg:pl-8">
-            <div className="space-y-8">
-              <h2 className="text-4xl font-black text-[#111111] uppercase tracking-tighter">Contact Us</h2>
+          <div className="space-y-12 lg:pl-8">
+            <div className="space-y-6">
+              <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
+                {toTitleCase("Contact Us")}
+              </h2>
               
-              <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-[40px] border border-gray-100 shadow-2xl shadow-[#1FD73D]/5 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Full Name</label>
+              <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-2xl shadow-[#064e3b]/5 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black tracking-widest text-gray-400 ml-1">Full Name</label>
                     <Input 
                       placeholder="John Doe" 
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="h-14 bg-gray-50 border-gray-100 rounded-2xl focus:ring-[#1FD73D]/20 font-bold"
+                      className="h-12 bg-gray-50 border-gray-100 rounded-xl focus:ring-[#064e3b]/20 font-bold text-sm"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Email Address</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black tracking-widest text-gray-400 ml-1">Email Address</label>
                     <Input 
                       type="email" 
                       placeholder="john@example.com" 
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="h-14 bg-gray-50 border-gray-100 rounded-2xl focus:ring-[#1FD73D]/20 font-bold"
+                      className="h-12 bg-gray-50 border-gray-100 rounded-xl focus:ring-[#064e3b]/20 font-bold text-sm"
                       required
                     />
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Message</label>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black tracking-widest text-gray-400 ml-1">Message</label>
                   <textarea 
                     placeholder="How can we help you?" 
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
-                    className="w-full min-h-[120px] p-4 rounded-2xl bg-gray-50 border border-gray-100 text-base focus:outline-none focus:ring-2 focus:ring-[#1FD73D]/20 font-bold text-gray-700 shadow-inner"
+                    className="w-full min-h-[100px] p-3 rounded-xl bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 font-bold text-gray-700 shadow-inner"
                     required
                   />
                 </div>
 
-                <Button type="submit" className="w-full h-16 bg-[#059669] hover:bg-[#047857] text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl shadow-[0_10px_30px_-10px_rgba(5,150,105,0.5)] transition-all hover:scale-[1.01] active:scale-95 border-none flex items-center justify-center gap-3">
-                  <Send className="w-5 h-5" /> Submit Collaboration Request
+                <Button type="submit" className="w-full h-14 bg-[#064e3b] hover:bg-[#14532d] text-white font-black tracking-widest text-[10px] md:text-xs rounded-xl shadow-[0_10px_30px_-10px_rgba(6,78,59,0.5)] transition-all hover:scale-[1.01] active:scale-95 border-none flex items-center justify-center gap-3">
+                  <Send className="w-4 h-4" /> {toTitleCase(config?.buttons?.collabCta || "Submit Collaboration Request")}
                 </Button>
               </form>
             </div>
 
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black text-[#111111] uppercase tracking-tighter">We Are Social</h2>
-                <div className="w-20 h-1.5 bg-[#1FD73D] rounded-full" />
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
+                  {toTitleCase("We Are Social")}
+                </h2>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 {socialLinks.map((social, i) => (
                   <a
                     key={i}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex flex-col items-center justify-center gap-3 py-6 rounded-[24px] ${social.color} text-white transition-all hover:scale-105 active:scale-95 shadow-xl group border-b-4 border-black/10`}
+                    className={`flex flex-col items-center justify-center gap-2 py-4 rounded-2xl ${social.color} text-white transition-all hover:scale-105 active:scale-95 shadow-lg group border-b-4 border-black/10`}
                   >
-                    <social.icon className="w-8 h-8 group-hover:rotate-6 transition-transform" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{social.name}</span>
+                    <social.icon className="w-6 h-6 group-hover:rotate-6 transition-transform" />
+                    <span className="text-[9px] font-black tracking-widest">{toTitleCase(social.name)}</span>
                   </a>
                 ))}
               </div>
 
               {/* Admin Support Link */}
-              <div className="p-6 rounded-3xl bg-[#0B1221] text-white flex items-center justify-between gap-4 border-b-4 border-[#1FD73D]">
-                <div className="flex items-center gap-4">
-                  <ShieldCheck className="w-8 h-8 text-[#1FD73D]" />
+              <div className="p-5 rounded-2xl bg-[#0B1221] text-white flex items-center justify-between gap-4 border-b-4 border-[#064e3b]">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="w-6 h-6 text-[#064e3b]" />
                   <div className="text-left">
-                    <p className="text-xs font-black uppercase tracking-widest">Admin Support</p>
-                    <p className="text-[10px] text-white/50 font-bold uppercase">Direct Access</p>
+                    <p className="text-[10px] font-black tracking-widest">{toTitleCase("Admin Support")}</p>
+                    <p className="text-[9px] text-white/50 font-bold">{toTitleCase("Direct Access")}</p>
                   </div>
                 </div>
                 <a 
-                  href={`https://wa.me/${ADMIN_PHONE}`}
+                  href={config?.buttons?.heroCtaLink || `https://wa.me/${ADMIN_PHONE}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 bg-[#25D366] rounded-xl font-black uppercase tracking-widest text-[9px] hover:scale-105 transition-transform"
+                  className="px-3 py-1.5 bg-[#064e3b] text-white rounded-lg font-black tracking-widest text-[8px] hover:scale-105 transition-transform"
                 >
-                  Message Admin
+                  {toTitleCase(config?.buttons?.messageAdminCta || "Message Admin")}
                 </a>
               </div>
             </div>
