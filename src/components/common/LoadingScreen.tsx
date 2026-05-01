@@ -22,14 +22,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         {/* Animated outer ring */}
         <motion.div 
           animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           className="absolute inset-0 rounded-[48px] border-2 border-emerald-500/10 shadow-[0_0_50px_rgba(16,185,129,0.05)]"
         />
         
         {/* Secondary ring */}
         <motion.div 
           animate={{ rotate: -360 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
           className="absolute inset-4 rounded-[40px] border-2 border-emerald-500/5"
         />
 
@@ -40,7 +40,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         <motion.div
           initial={{ scale: 0.9 }}
           animate={{ scale: [0.9, 1.05, 0.9] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="relative z-10 w-3/4 h-3/4"
         >
           <img

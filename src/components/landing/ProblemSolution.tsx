@@ -35,9 +35,9 @@ export function ProblemSolution({ onSignUpClick, config }: ProblemSolutionProps)
   ];
 
   return (
-    <section id="solutions" className="py-20 bg-white">
+    <section id="solutions" className="py-6 bg-white">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center max-w-5xl mx-auto mb-6 space-y-1">
+        <div className="text-center max-w-5xl mx-auto mb-3 space-y-1">
           <h2 className="text-[clamp(12px,4.5vw,32px)] font-black text-[#111111] tracking-tighter whitespace-nowrap">
             {toTitleCase("Bridging the Gap in")} <span className="text-[#064e3b]">{toTitleCase("Indian Healthcare")}</span>
           </h2>
@@ -109,38 +109,6 @@ export function ProblemSolution({ onSignUpClick, config }: ProblemSolutionProps)
               </div>
             )}
           </div>
-        </div>
-
-        {/* Combined Master CTA Box */}
-        <div className="mt-10 p-6 md:p-10 rounded-[40px] bg-[#064e3b] text-white shadow-2xl border-b-8 border-black/20 flex flex-col items-center text-center space-y-6">
-          
-          {/* Top Taglines */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 opacity-80">
-            {["NO CONFUSION.", "NO LOST REPORTS.", "NO REPEATED TESTS."].map((text, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#1FD73D]" />
-                <span className="text-[10px] md:text-xs font-bold tracking-[0.2em]">{toTitleCase(text)}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Main Messaging */}
-          <div className="space-y-2">
-            <h4 className="text-3xl md:text-5xl font-bold tracking-tighter leading-none">
-              {toTitleCase("Ready to take control?")}
-            </h4>
-            <p className="text-sm md:text-lg text-white/80 font-bold italic leading-tight max-w-xl mx-auto">
-              Join Arogyadatha today and experience the future of healthcare.
-            </p>
-          </div>
-
-          {/* Action Button */}
-          <button 
-            onClick={onSignUpClick}
-            className="group relative flex items-center justify-center px-10 py-4 bg-white text-[#064e3b] font-bold tracking-widest text-[11px] md:text-sm rounded-2xl shadow-xl hover:bg-gray-50 transition-all active:scale-95 border-none"
-          >
-            {toTitleCase(config?.buttons?.signUpCta || "Create Your Health ID")}
-          </button>
         </div>
       </div>
     </section>

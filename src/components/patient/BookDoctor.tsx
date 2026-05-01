@@ -505,28 +505,28 @@ export default function BookDoctor({ user, userCases, onBack, t, preSelectedCase
     <>
     <div className="flex-1 flex flex-col w-full max-w-7xl mx-auto px-0 bg-transparent overflow-x-hidden">
       <div className="flex-shrink-0 z-50 space-y-1 pb-3 sticky top-0 bg-[#F0F9F4]/98 backdrop-blur-md w-full overflow-x-hidden border-b border-emerald-50">
-        <div className="pt-2 px-3">
-          <div className="flex p-1.5 bg-white rounded-[24px] shadow-sm border border-emerald-100 w-full mx-auto">
+        <div className="pt-0 px-0">
+          <div className="flex p-1 bg-white shadow-sm border-b border-emerald-50 w-full">
             <button
               onClick={() => setActiveTab('find')}
-              className={`flex-1 py-3.5 px-2 rounded-[20px] font-black text-[11px] sm:text-[13px] uppercase tracking-wider transition-all duration-300 ${
-                activeTab === 'find' ? 'bg-[#0B6B4F] text-white shadow-lg' : 'text-gray-400 hover:text-[#0B6B4F]'
+              className={`flex-1 py-2.5 px-1 rounded-xl font-black text-[10px] sm:text-[12px] uppercase tracking-tighter whitespace-nowrap transition-all duration-300 ${
+                activeTab === 'find' ? 'bg-[#0B6B4F] text-white shadow-md' : 'text-slate-900 hover:text-[#0B6B4F]'
               }`}
             >
               {t.findDoctor || "Find Doctor"}
             </button>
             <button
               onClick={() => setActiveTab('hospitals')}
-              className={`flex-1 py-3.5 px-2 rounded-[20px] font-black text-[11px] sm:text-[13px] uppercase tracking-wider transition-all duration-300 ${
-                activeTab === 'hospitals' ? 'bg-[#0B6B4F] text-white shadow-lg' : 'text-gray-400 hover:text-[#0B6B4F]'
+              className={`flex-1 py-2.5 px-1 rounded-xl font-black text-[10px] sm:text-[12px] uppercase tracking-tighter whitespace-nowrap transition-all duration-300 ${
+                activeTab === 'hospitals' ? 'bg-[#0B6B4F] text-white shadow-md' : 'text-slate-900 hover:text-[#0B6B4F]'
               }`}
             >
               Hospitals
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex-1 py-3.5 px-2 rounded-[20px] font-black text-[11px] sm:text-[13px] capitalize tracking-wider transition-all duration-300 ${
-                activeTab === 'history' ? 'bg-[#0B6B4F] text-white shadow-lg' : 'text-gray-400 hover:text-[#0B6B4F]'
+              className={`flex-1 py-2.5 px-1 rounded-xl font-black text-[10px] sm:text-[12px] capitalize tracking-tighter whitespace-nowrap transition-all duration-300 ${
+                activeTab === 'history' ? 'bg-[#0B6B4F] text-white shadow-md' : 'text-slate-900 hover:text-[#0B6B4F]'
               }`}
             >
               Appointment History

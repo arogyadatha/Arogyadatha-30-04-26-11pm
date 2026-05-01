@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { 
   Linkedin, 
   Twitter, 
-  MessageCircle, 
   Send, 
   Youtube,
   Facebook,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { WhatsAppIcon } from "./WhatsAppIcon";
 
 export function FounderContact({ config }: { config?: any }) {
   const ADMIN_PHONE = "918008334948";
@@ -36,17 +36,17 @@ export function FounderContact({ config }: { config?: any }) {
     { name: "YouTube", icon: Youtube, color: "bg-[#FF0000]", href: "https://youtube.com/@arogyadatha" },
     { name: "Facebook", icon: Facebook, color: "bg-[#1877F2]", href: "https://www.facebook.com/share/18Gsxdcvdp/" },
     { name: "Instagram", icon: Instagram, color: "bg-[#E4405F]", href: "https://www.instagram.com/arogyadatha" },
-    { name: "WhatsApp", icon: MessageCircle, color: "bg-[#064e3b]", href: config?.buttons?.heroCtaLink || `https://wa.me/${ADMIN_PHONE}` },
+    { name: "WhatsApp", icon: WhatsAppIcon, color: "bg-[#064e3b]", href: config?.buttons?.heroCtaLink || `https://wa.me/${ADMIN_PHONE}` },
   ];
 
   return (
-    <section id="team" className="py-12 bg-white overflow-hidden border-t border-gray-100">
+    <section id="team" className="py-4 bg-white overflow-hidden border-t border-gray-100">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           
           {/* Left Column: Team Members */}
-          <div className="space-y-10">
-            <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="space-y-1">
               <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
                 {toTitleCase("Our Team Members")}
               </h2>
@@ -122,8 +122,8 @@ export function FounderContact({ config }: { config?: any }) {
           </div>
 
           {/* Right Column: Contact & Social */}
-          <div className="space-y-12 lg:pl-8">
-            <div className="space-y-6">
+          <div className="space-y-4 lg:pl-8">
+            <div className="space-y-3">
               <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
                 {toTitleCase("Contact Us")}
               </h2>
@@ -177,17 +177,17 @@ export function FounderContact({ config }: { config?: any }) {
                 </h2>
               </div>
               
-              <div className="grid grid-cols-3 gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {socialLinks.map((social, i) => (
                   <a
                     key={i}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex flex-col items-center justify-center gap-2 py-4 rounded-2xl ${social.color} text-white transition-all hover:scale-105 active:scale-95 shadow-lg group border-b-4 border-black/10`}
+                    className={`w-11 h-11 flex items-center justify-center rounded-xl ${social.color} text-white transition-all hover:scale-110 active:scale-95 shadow-md group border-b-2 border-black/10`}
+                    title={social.name}
                   >
-                    <social.icon className="w-6 h-6 group-hover:rotate-6 transition-transform" />
-                    <span className="text-[9px] font-black tracking-widest">{toTitleCase(social.name)}</span>
+                    <social.icon className="w-5 h-5 group-hover:rotate-6 transition-transform" />
                   </a>
                 ))}
               </div>

@@ -33,6 +33,7 @@ import {
   Sun,
   Lock,
   Facebook,
+  Phone,
   Menu,
   Plus,
   Home,
@@ -47,7 +48,9 @@ import {
   signOut,
   signInWithPopup,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
 } from 'firebase/auth';
 import {
   doc,
@@ -138,6 +141,47 @@ export default function App() {
   const [detectedRole, setDetectedRole] = useState<UserRole | null>(null);
   const [roleCache, setRoleCache] = useState<Record<string, UserRole>>({});
   const [confirmRole, setConfirmRole] = useState(false);
+  const [isPhoneLogin, setIsPhoneLogin] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+
+  useEffect(() => {
+    let timer: any;
+    if (resendTimer > 0) {
+      timer = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  const handleSendOtp = async () => {
+    if (!loginInput || !/^\d{10}$/.test(loginInput.trim())) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+    setIsOtpLoading(true);
+    try {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible'
+        });
+      }
+
+      const phoneNumber = `+91${loginInput.trim()}`;
+      const result = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+      setConfirmationResult(result);
+      setOtpSent(true);
+      setResendTimer(60);
+      toast.success("OTP sent successfully to your phone!");
+    } catch (error: any) {
+      console.error("SMS Auth Error:", error);
+      toast.error("Failed to send OTP. Ensure Phone Auth is enabled in Firebase Console.");
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
 
   // UI States
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -257,12 +301,12 @@ export default function App() {
       languageLabel: "Language",
       verifiedPatient: "Verified Patient",
       signInTitle: "Sign in to your account",
-      identityLabel: "Identity Identifier",
-      securityKeyLabel: "Security Key",
-      forgotKey: "Forgot Security Key?",
+      identityLabel: "Email / Phone / Arogyadatha ID",
+      securityKeyLabel: "Password",
+      forgotKey: "Forgot Password?",
       systemDetection: "System Detection",
       authenticatingAs: "Authenticating as",
-      verifyIdentity: "Verify Identity",
+      verifyIdentity: "Login",
       socialAccess: "Social Access",
       dontHaveAccount: "Don't have an account?",
       signUp: "Sign Up",
@@ -477,12 +521,12 @@ export default function App() {
       languageLabel: "భాష",
       verifiedPatient: "ధృవీకరించబడిన రోగి",
       signInTitle: "మీ ఖాతాకు లాగిన్ అవ్వండి",
-      identityLabel: "గుర్తింపు ఐడెంటిఫైయర్",
-      securityKeyLabel: "భద్రతా కీ",
-      forgotKey: "భద్రతా కీని మర్చిపోయారా?",
+      identityLabel: "ఈమెయిల్ / ఫోన్ / ఆరోగ్యదాత ఐడి",
+      securityKeyLabel: "పాస్‌వర్డ్",
+      forgotKey: "పాస్‌వర్డ్ మర్చిపోయారా?",
       systemDetection: "సిస్టమ్ గుర్తింపు",
       authenticatingAs: "గా లాగిన్ అవుతున్నారు",
-      verifyIdentity: "గుర్తింపును ధృవీకరించు",
+      verifyIdentity: "లాగిన్",
       socialAccess: "సోషల్ యాక్సెస్",
       dontHaveAccount: "ఖాతా లేదా?",
       signUp: "సైన్ అప్",
@@ -608,7 +652,7 @@ export default function App() {
   const t = isLanguageTelugu ? translations.te : translations.en;
 
   const GoogleIcon = () => (
-    <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" viewBox="0 0 24 24">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -638,8 +682,8 @@ export default function App() {
 
       {showText && (
         <div className="flex flex-col">
-          <h1 className={`text-xl font-black tracking-tighter uppercase leading-none ${light ? 'text-white' : 'text-white'}`}>Arogyadatha</h1>
-          <span className={`text-[8px] font-black uppercase tracking-[0.2em] leading-none mt-1 ${light ? 'text-white/60' : 'text-emerald-200'}`}>Your Health Friend</span>
+          <h1 className={`text-xl font-black tracking-tighter capitalize leading-none ${light ? 'text-white' : 'text-white'}`}>Arogyadatha</h1>
+          <span className={`text-[8px] font-black capitalize tracking-[0.2em] leading-none mt-1 ${light ? 'text-white/60' : 'text-emerald-200'}`}>Your Health Friend</span>
         </div>
       )}
     </div>
@@ -1040,12 +1084,23 @@ export default function App() {
         handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
       }
     } catch (error: any) {
-      console.error(error);
-      if (error.code === 'auth/network-request-failed') {
-        toast.error("Network error. Please check your connection or Firebase configuration.");
+      console.error("Signup error:", error);
+      let msg = "Signup failed. Please try again.";
+      
+      if (error.code === 'auth/email-already-in-use') {
+        msg = "This Email or Phone is already registered. Please Login instead or use Forgot Password.";
+      } else if (error.code === 'auth/network-request-failed') {
+        msg = "Network error. Please check your internet connection.";
+      } else if (error.code === 'auth/invalid-email') {
+        msg = "Invalid email format. Please check and try again.";
+      } else if (error.code === 'auth/weak-password') {
+        msg = "Password is too weak. Please use a stronger password.";
       } else {
-        toast.error(error.message || "Signup failed");
+        msg = error.message || "Registration failed";
       }
+
+      setAuthError(msg);
+      toast.error(msg, { duration: 6000 });
     } finally {
       setAuthLoading(false);
     }
@@ -1055,6 +1110,15 @@ export default function App() {
     e.preventDefault();
     setAuthLoading(true);
     try {
+      if (isPhoneLogin) {
+        if (!confirmationResult) {
+          throw new Error("Please request OTP first.");
+        }
+        await confirmationResult.confirm(otp);
+        toast.success("Phone verified successfully!");
+        return;
+      }
+
       const trimmedInput = loginInput.trim();
       let loginEmail = trimmedInput;
 
@@ -1170,11 +1234,21 @@ export default function App() {
         signOut(auth);
       }
     } catch (error: any) {
-      console.error(error);
-      const msg = error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found'
-        ? "Invalid credentials. Please check your Email/ID and Password."
-        : error.message || "Login failed";
-      toast.error(msg);
+      console.error("Login error:", error);
+      let msg = "Authentication failed. Please try again.";
+      
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.message?.includes('not found')) {
+        msg = "Account not found. If you are new, please Create an Account first.";
+      } else if (error.code === 'auth/wrong-password') {
+        msg = "Incorrect password. You can reset it via your Email or Phone OTP.";
+      } else if (error.code === 'auth/too-many-requests') {
+        msg = "Too many attempts. Please try again later or reset your password.";
+      } else {
+        msg = error.message || "Login failed";
+      }
+
+      setAuthError(msg);
+      toast.error(msg, { duration: 5000 });
     } finally {
       setAuthLoading(false);
     }
@@ -1328,6 +1402,7 @@ export default function App() {
   return (
     <div className={`${['landing', 'hero', 'role-selection', 'signup', 'login'].includes(view) ? 'min-h-screen' : 'h-screen overflow-hidden'} ${isDarkMode ? 'dark bg-slate-950' : 'bg-[#F0F9F4]'} font-sans relative flex flex-col`}>
       <Toaster position="top-center" richColors />
+      <div id="recaptcha-container"></div>
 
       <AnimatePresence mode="wait">
         {authLoading && (
@@ -1457,7 +1532,7 @@ export default function App() {
                       <img src="/assets/images/logo.png" alt="Arogyadatha" className="w-8 h-8 object-contain" />
                     </div>
                     <h2 className="text-[22px] sm:text-[28px] font-black text-[#1F2937] tracking-tight leading-tight">Select Your Role</h2>
-                    <p className="text-[12px] sm:text-[14px] text-[#6B7280] font-bold mt-1.5 uppercase tracking-widest">Choose how you want to use Arogyadatha</p>
+                    <p className="text-[12px] sm:text-[14px] text-[#6B7280] font-bold mt-1.5 capitalize tracking-widest">Choose how you want to use Arogyadatha</p>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
@@ -1488,7 +1563,7 @@ export default function App() {
                           </div>
                           <div className="text-center">
                             <h3 className="font-black text-[13px] sm:text-[15px] text-[#1F2937] group-hover:text-[#0F9D58] transition-colors">{role.title}</h3>
-                            <p className="text-[9px] sm:text-[10px] text-[#6B7280] font-bold mt-0.5 uppercase tracking-widest leading-tight">{role.desc}</p>
+                            <p className="text-[9px] sm:text-[10px] text-[#6B7280] font-bold mt-0.5 capitalize tracking-widest leading-tight">{role.desc}</p>
                           </div>
                         </button>
                       </motion.div>
@@ -1530,7 +1605,7 @@ export default function App() {
                     {/* Floating Back Button (Desktop) */}
                     <button
                       onClick={() => setView('landing')}
-                      className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-black/10 hover:bg-black/20 rounded-full transition-all text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-md"
+                      className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-black/10 hover:bg-black/20 rounded-full transition-all text-[10px] font-black capitalize tracking-widest text-white backdrop-blur-md"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" /> Back
                     </button>
@@ -1562,7 +1637,7 @@ export default function App() {
                         </div>
                         <div className="mt-4 text-center">
                           <h2 className="text-xl font-extrabold tracking-tight leading-none text-white">Arogyadatha</h2>
-                          <p className="text-[7px] font-bold tracking-[0.3em] uppercase text-[#A7F3D0] mt-1.5">Digital Health Network</p>
+                          <p className="text-[7px] font-bold tracking-[0.3em] capitalize text-[#A7F3D0] mt-1.5">Digital Health Network</p>
                         </div>
                       </div>
 
@@ -1580,7 +1655,7 @@ export default function App() {
                     {/* ISO Badge */}
                     <div className="relative z-40 w-fit px-3 py-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-2">
                       <ShieldCheck className="w-3.5 h-3.5 text-white" />
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-white">{t.isoCertified}</span>
+                      <span className="text-[8px] font-bold capitalize tracking-widest text-white">{t.isoCertified}</span>
                     </div>
                   </div>
 
@@ -1591,7 +1666,7 @@ export default function App() {
                     </div>
                     <div className="text-left">
                       <h2 className="text-[20px] font-black text-[#0F9D58] leading-none">Arogyadatha</h2>
-                      <p className="text-[6px] font-black tracking-[0.3em] text-slate-400 uppercase mt-0.5">Digital Health Network</p>
+                      <p className="text-[6px] font-black tracking-[0.3em] text-slate-400 capitalize mt-0.5">Digital Health Network</p>
                     </div>
                   </div>
 
@@ -1600,7 +1675,7 @@ export default function App() {
                     <div className="w-full max-w-[500px] space-y-5 lg:space-y-6">
                       <div className="text-center md:text-left mb-1 pt-1">
                         <h1 className="text-[16px] sm:text-[18px] font-black text-[#1F2937] tracking-tight flex items-center justify-center md:justify-start gap-1.5">
-                          Register as <span className="text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded text-[10px] sm:text-[11px]">{selectedRole}</span>
+                          Register as <span className="text-emerald-600 capitalize tracking-widest bg-emerald-50 px-2 py-0.5 rounded text-[10px] sm:text-[11px]">{selectedRole}</span>
                         </h1>
                       </div>
 
@@ -1878,7 +1953,7 @@ export default function App() {
                         </div>
                         <div className="mt-4 text-center">
                           <h2 className="text-xl font-extrabold tracking-tight leading-none text-white">Arogyadatha</h2>
-                          <p className="text-[7px] font-bold tracking-[0.3em] uppercase text-[#A7F3D0] mt-1.5">Digital Health Network</p>
+                          <p className="text-[7px] font-bold tracking-[0.3em] capitalize text-[#A7F3D0] mt-1.5">Digital Health Network</p>
                         </div>
                       </div>
 
@@ -1896,7 +1971,7 @@ export default function App() {
                     {/* ISO Badge */}
                     <div className="relative z-40 w-fit px-3 py-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 flex items-center gap-2">
                       <ShieldCheck className="w-3.5 h-3.5 text-white" />
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-white">{t.isoCertified}</span>
+                      <span className="text-[8px] font-bold capitalize tracking-widest text-white">{t.isoCertified}</span>
                     </div>
                   </div>
 
@@ -1907,14 +1982,14 @@ export default function App() {
                     </div>
                     <div className="text-left">
                       <h2 className="text-[20px] font-black text-[#0F9D58] leading-none">Arogyadatha</h2>
-                      <p className="text-[6px] font-black tracking-[0.3em] text-slate-400 uppercase mt-0.5">Digital Health Network</p>
+                      <p className="text-[6px] font-black tracking-[0.3em] text-slate-400 capitalize mt-0.5">Digital Health Network</p>
                     </div>
                   </div>
 
                   {/* Form Section (Right) */}
-                  <div className="flex-1 bg-white flex flex-col items-center justify-start md:justify-center px-5 pb-6 pt-2 sm:p-6 md:p-8 lg:p-10 relative z-10 w-full">
-                    <div className="w-full max-w-[400px] space-y-5 lg:space-y-6">
-                      <div className="text-center md:text-left mb-1">
+                  <div className="flex-1 bg-white flex flex-col items-center justify-center px-5 pb-4 pt-1 sm:p-6 md:p-8 lg:p-10 relative z-10 w-full overflow-hidden">
+                    <div className="w-full max-w-[400px] space-y-3 lg:space-y-4">
+                      <div className="text-center md:text-left mb-3">
                         <h1 className="text-[16px] sm:text-[18px] font-black text-[#1F2937] tracking-tight">{t.signInTitle}</h1>
                       </div>
 
@@ -1922,65 +1997,76 @@ export default function App() {
                         <div className="space-y-1">
                           <Label className="text-[10px] font-bold text-[#6B7280] ml-1">{t.identityLabel}</Label>
                           <div className="relative group">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-[16px] h-[16px] text-[#9CA3AF] group-focus-within:text-[#0F9D58] transition-colors" />
+                            <User className="absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9CA3AF] group-focus-within:text-[#0F9D58] transition-colors" />
                             <Input
                               required
                               type="text"
-                              placeholder="lokeshbabu9298@gmail.com"
-                              className="h-[44px] lg:h-[48px] pl-10 rounded-[12px] border border-gray-200 bg-white hover:bg-gray-50 focus:bg-white focus:border-[#0F9D58] focus:ring-4 focus:ring-[#0F9D58]/10 transition-all font-medium text-[#1F2937] placeholder:text-[#9CA3AF] shadow-sm text-[12px] lg:text-[13px]"
+                              placeholder="Email / Phone / Arogyadatha ID"
+                              className="h-[56px] pl-12 rounded-[16px] border border-gray-200 bg-white hover:bg-gray-50 focus:bg-white focus:border-[#0F9D58] focus:ring-4 focus:ring-[#0F9D58]/10 transition-all font-medium text-[#1F2937] placeholder:text-[#9CA3AF] shadow-sm text-[14px]"
                               value={loginInput}
                               onChange={(e) => setLoginInput(e.target.value)}
                             />
+                            {isPhoneLogin && (
+                              <button
+                                type="button"
+                                disabled={isOtpLoading || resendTimer > 0}
+                                onClick={handleSendOtp}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black capitalize tracking-widest text-[#0F9D58] hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-emerald-100 shadow-sm"
+                              >
+                                {isOtpLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : (resendTimer > 0 ? `Resend in ${resendTimer}s` : "Send OTP")}
+                              </button>
+                            )}
                           </div>
+                          {detectedRole && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="flex items-center gap-1.5 ml-1.5 mt-1"
+                            >
+                              <div className="w-1.5 h-1.5 bg-[#0F9D58] rounded-full animate-pulse" />
+                              <p className="text-[10px] font-bold text-[#059669] tracking-wide">You are a <span className="capitalize">{detectedRole}</span></p>
+                            </motion.div>
+                          )}
                         </div>
 
                         <div className="space-y-1">
-                          <Label className="text-[10px] font-bold text-[#6B7280] ml-1">{t.securityKeyLabel}</Label>
+                          <Label className="text-[10px] font-bold text-[#6B7280] ml-1">{isPhoneLogin ? '6-Digit OTP' : t.securityKeyLabel}</Label>
                           <div className="relative group">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[16px] h-[16px] text-[#9CA3AF] group-focus-within:text-[#0F9D58] transition-colors" />
+                            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#9CA3AF] group-focus-within:text-[#0F9D58] transition-colors" />
                             <Input
                               required
-                              type={showPassword ? "text" : "password"}
-                              placeholder="••••••••••"
-                              className="h-[44px] lg:h-[48px] pl-10 pr-10 rounded-[12px] border border-gray-200 bg-white hover:bg-gray-50 focus:bg-white focus:border-[#0F9D58] focus:ring-4 focus:ring-[#0F9D58]/10 transition-all font-medium text-[#1F2937] shadow-sm tracking-widest text-[12px] lg:text-[13px]"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
+                              type={isPhoneLogin ? "text" : (showPassword ? "text" : "password")}
+                              maxLength={isPhoneLogin ? 6 : undefined}
+                              placeholder={isPhoneLogin ? "Enter 6-digit OTP" : "••••••••••"}
+                              className="h-[56px] pl-12 pr-12 rounded-[16px] border border-gray-200 bg-white hover:bg-gray-50 focus:bg-white focus:border-[#0F9D58] focus:ring-4 focus:ring-[#0F9D58]/10 transition-all font-medium text-[#1F2937] shadow-sm tracking-widest text-[14px]"
+                              value={isPhoneLogin ? otp : password}
+                              onChange={(e) => isPhoneLogin ? setOtp(e.target.value) : setPassword(e.target.value)}
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#0F9D58] transition-colors"
-                            >
-                              {showPassword ? <EyeOff className="w-[16px] h-[16px]" /> : <Eye className="w-[16px] h-[16px]" />}
-                            </button>
+                            {!isPhoneLogin && (
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#0F9D58] transition-colors"
+                              >
+                                {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                              </button>
+                            )}
                           </div>
-                          <div className="flex justify-end pr-1 pt-1">
-                            <button type="button" className="text-[9px] lg:text-[10px] font-bold text-[#0F9D58] hover:underline">{t.forgotKey}</button>
-                          </div>
+                          {!isPhoneLogin && (
+                            <div className="flex justify-end pr-1 pt-1">
+                              <button type="button" className="text-[9px] lg:text-[10px] font-bold text-[#0F9D58] hover:underline">{t.forgotKey}</button>
+                            </div>
+                          )}
                         </div>
 
-                        {detectedRole && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="p-2.5 bg-[#F0F9F4] rounded-[12px] border border-[#0F9D58]/20 flex items-center gap-2.5 shadow-sm"
-                          >
-                            <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
-                              <ShieldCheck className="w-3.5 h-3.5 text-[#0F9D58]" />
-                            </div>
-                            <div>
-                              <p className="text-[7px] lg:text-[8px] font-bold text-[#6B7280] uppercase tracking-widest leading-none mb-0.5">{t.systemDetection}</p>
-                              <p className="text-[10px] lg:text-[11px] font-bold text-[#059669]">{t.authenticatingAs} <span className="uppercase">{detectedRole}</span></p>
-                            </div>
-                          </motion.div>
-                        )}
+
 
                         <div className="pt-1">
-                          <Button
-                            disabled={authLoading}
-                            type="submit"
-                            className="w-full h-[44px] lg:h-[48px] text-[13px] lg:text-[14px] font-bold bg-[#0F9D58] hover:bg-[#0b8a4d] text-white rounded-[12px] shadow-[0_8px_20px_rgba(15,157,88,0.25)] hover:shadow-[0_12px_24px_rgba(15,157,88,0.35)] hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                          >
+                            <Button
+                              disabled={authLoading}
+                              type="submit"
+                              className="w-full h-[56px] text-[15px] font-bold bg-[#0F9D58] hover:bg-[#0b8a4d] text-white rounded-[16px] shadow-[0_8px_20px_rgba(15,157,88,0.25)] hover:shadow-[0_12px_24px_rgba(15,157,88,0.35)] hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            >
                             {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                               <>
                                 {t.verifyIdentity}
@@ -1990,33 +2076,37 @@ export default function App() {
                           </Button>
                         </div>
 
-                        <div className="relative py-2.5 lg:py-3">
+                        <div className="relative py-1">
                           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-                          <div className="relative flex justify-center"><span className="bg-white px-3 text-[8px] lg:text-[9px] font-bold text-[#9CA3AF] uppercase tracking-[0.2em]">Social Access</span></div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2.5">
-                          <Button type="button" variant="outline" className="h-[40px] lg:h-[44px] border-gray-200 rounded-[10px] hover:bg-gray-50 flex items-center justify-center gap-1.5 transition-all shadow-sm px-2" onClick={handleGoogleSignIn}>
+                          <Button type="button" variant="outline" className="h-[40px] lg:h-[44px] border-gray-200 rounded-[10px] hover:bg-gray-50 flex items-center justify-center gap-2 transition-all shadow-sm px-2" onClick={handleGoogleSignIn}>
                             <GoogleIcon />
-                            <span className="font-bold text-[10px] lg:text-[11px] text-[#4B5563] truncate">Google</span>
+                            <span className="font-bold text-[13px] text-[#4B5563]">Google</span>
                           </Button>
-                          <Button type="button" variant="outline" className="h-[40px] lg:h-[44px] border-gray-200 rounded-[10px] hover:bg-gray-50 flex items-center justify-center gap-1.5 transition-all shadow-sm px-2">
-                            <div className="w-4 h-4 bg-[#1877F2] rounded-full flex items-center justify-center shrink-0">
-                              <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className={`h-[40px] lg:h-[44px] border-gray-200 rounded-[10px] flex items-center justify-center gap-2 transition-all shadow-sm px-2 group ${isPhoneLogin ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/10' : 'hover:bg-emerald-50 hover:border-emerald-200'}`}
+                            onClick={() => setIsPhoneLogin(!isPhoneLogin)}
+                          >
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${isPhoneLogin ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white'}`}>
+                              <Phone className="w-3.5 h-3.5" />
                             </div>
-                            <span className="font-bold text-[10px] lg:text-[11px] text-[#4B5563] truncate">Facebook</span>
+                            <span className={`font-bold text-[13px] ${isPhoneLogin ? 'text-emerald-700' : 'text-[#4B5563] group-hover:text-emerald-700'}`}>Phone</span>
                           </Button>
                         </div>
 
-                        <div className="pt-2 lg:pt-3 text-center space-y-2 lg:space-y-3">
-                          <div className="flex items-center justify-center gap-2 text-gray-400">
+                        <div className="pt-3 text-center space-y-3">
+                          <p className="text-[#6B7280] font-medium text-[12px]">
+                            Don't have an account? <button type="button" onClick={() => setView('role-selection')} className="text-[#0F9D58] font-bold hover:underline">Sign Up</button>
+                          </p>
+                          <div className="flex items-center justify-center gap-2 text-gray-400 pt-1 border-t border-gray-50">
                             <button type="button" onClick={() => setView('terms')} className="text-[10px] font-bold hover:text-[#0F9D58] transition-colors">Terms</button>
                             <span className="w-1 h-1 bg-gray-200 rounded-full" />
                             <button type="button" onClick={() => setView('privacy')} className="text-[10px] font-bold hover:text-[#0F9D58] transition-colors">Privacy</button>
                           </div>
-                          <p className="text-[#6B7280] font-medium text-[10px] lg:text-[11px] pt-3 border-t border-gray-50">
-                            Don't have an account? <button type="button" onClick={() => setView('role-selection')} className="text-[#0F9D58] font-bold hover:underline">Sign Up</button>
-                          </p>
                         </div>
                       </form>
                     </div>
@@ -2065,11 +2155,11 @@ export default function App() {
                               className="hidden md:flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
                               onClick={() => setShowLocationPrompt(true)}
                             >
-                              <span className="text-[18px] font-black tracking-tight text-white leading-none">AROGYADATHA</span>
+                              <span className="text-[18px] font-black tracking-tight text-white leading-none">Arogyadatha</span>
                               {user && user.location_confirmed && (
                                 <div className="flex items-center gap-1 mt-1">
                                   <MapPin className="w-2.5 h-2.5 text-emerald-300 shrink-0" />
-                                  <span className="text-[9px] font-bold text-emerald-100 uppercase tracking-wider truncate max-w-[200px]">
+                                  <span className="text-[9px] font-bold text-emerald-100 capitalize tracking-wider truncate max-w-[200px]">
                                     {user.area}, {user.subArea ? `${user.subArea}, ` : ''}{user.city || user.district}, {user.state} {user.postcode}
                                   </span>
                                 </div>
@@ -2077,7 +2167,7 @@ export default function App() {
                               {user && !user.location_confirmed && (
                                 <div className="flex items-center gap-1 mt-1 animate-pulse">
                                   <MapPin className="w-2.5 h-2.5 text-red-300" />
-                                  <span className="text-[9px] font-bold text-red-100 uppercase tracking-wider">Set Location</span>
+                                  <span className="text-[9px] font-bold text-red-100 capitalize tracking-wider">Set Location</span>
                                 </div>
                               )}
                             </div>
@@ -2086,11 +2176,11 @@ export default function App() {
                             className="flex flex-col md:hidden cursor-pointer"
                             onClick={() => setShowLocationPrompt(true)}
                           >
-                            <span className="text-[15px] font-black tracking-tight text-white uppercase leading-none">AROGYADATHA</span>
+                            <span className="text-[15px] font-black tracking-tight text-white capitalize leading-none">Arogyadatha</span>
                             {user && user.location_confirmed && (
                               <div className="flex items-center gap-1 mt-0.5">
                                 <MapPin className="w-2 h-2 text-emerald-300 shrink-0" />
-                                <span className="text-[8px] font-bold text-emerald-200 uppercase truncate max-w-[100px]">
+                                <span className="text-[8px] font-bold text-emerald-200 capitalize truncate max-w-[100px]">
                                   {user.area}, {user.city || user.district} {user.postcode}
                                 </span>
                               </div>
@@ -2139,8 +2229,8 @@ export default function App() {
                                       className="absolute right-0 mt-3 w-[320px] bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-50"
                                     >
                                       <div className="p-4 border-b border-gray-50 flex items-center justify-between">
-                                        <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Notifications</h4>
-                                        <span className="bg-[#10B981] text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">New</span>
+                                        <h4 className="text-[12px] font-black text-slate-900 capitalize tracking-widest">Notifications</h4>
+                                        <span className="bg-[#10B981] text-white text-[8px] font-black px-2 py-0.5 rounded-full capitalize">New</span>
                                       </div>
                                       <div className="p-2 space-y-1">
                                         <div className="p-3 bg-[#F0F9F4] rounded-2xl border border-[#0b6b4f]/10 group cursor-pointer transition-all">
@@ -2165,7 +2255,7 @@ export default function App() {
                               className={`flex items-center gap-3 pl-3 pr-1.5 py-1 rounded-full transition-all ${showProfileMenu ? 'bg-white' : 'hover:bg-white/10'}`}
                             >
                               <div className="hidden md:flex flex-col text-right">
-                                <p className={`text-[8px] font-black uppercase tracking-widest leading-none mb-1 ${showProfileMenu ? 'text-[#0b6b4f]/60' : 'text-emerald-100/60'}`}>PATIENT</p>
+                                <p className={`text-[8px] font-black capitalize tracking-widest leading-none mb-1 ${showProfileMenu ? 'text-[#0b6b4f]/60' : 'text-emerald-100/60'}`}>PATIENT</p>
                                 <p className={`text-[11px] font-black leading-none ${showProfileMenu ? 'text-slate-900' : 'text-white'}`}>{user.fullName?.split(' ')[0]}</p>
                               </div>
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${showProfileMenu ? 'bg-[#0b6b4f] text-white shadow-md' : 'bg-white/20 text-white'}`}>
@@ -2189,7 +2279,7 @@ export default function App() {
                                       </div>
                                       <div>
                                         <p className="text-[12px] font-black text-slate-900 leading-none mb-1">{user.fullName}</p>
-                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{user.role}</p>
+                                        <p className="text-[9px] font-bold text-gray-400 capitalize tracking-widest">{user.role}</p>
                                       </div>
                                     </div>
 
@@ -2209,7 +2299,7 @@ export default function App() {
                                           className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F0F9F4] hover:text-[#0b6b4f] rounded-2xl text-gray-500 transition-all text-left"
                                         >
                                           <item.icon className="w-4 h-4" />
-                                          <span className="text-[11px] font-black uppercase tracking-tight">{item.label}</span>
+                                          <span className="text-[11px] font-black capitalize tracking-tight">{item.label}</span>
                                         </button>
                                       ))}
                                     </div>
@@ -2217,7 +2307,7 @@ export default function App() {
                                     <div className="mt-2 pt-2 border-t border-gray-50">
                                       <button
                                         onClick={handleLogout}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all font-black text-[11px] uppercase tracking-widest"
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all font-black text-[11px] capitalize tracking-widest"
                                       >
                                         <ArrowRight className="w-4 h-4" /> Logout
                                       </button>
@@ -2248,7 +2338,7 @@ export default function App() {
                                 </button>
                                 <div className="flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Account</span>
+                                  <span className="text-[10px] font-black text-gray-400 capitalize tracking-widest">Active Account</span>
                                 </div>
                               </div>
 
@@ -2260,10 +2350,10 @@ export default function App() {
                                       <div className="w-24 h-24 bg-gradient-to-br from-[#0b6b4f] to-[#10B981] rounded-[28px] flex items-center justify-center text-white mx-auto mb-6 shadow-2xl transform group-hover:rotate-3 transition-transform">
                                         <User className="w-12 h-12" />
                                       </div>
-                                      <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-1 truncate px-2">{user.fullName}</h2>
+                                      <h2 className="text-2xl font-black text-slate-900 capitalize tracking-tighter mb-1 truncate px-2">{user.fullName}</h2>
                                       <div className="flex flex-col items-center gap-2">
-                                        <span className="text-[#0b6b4f] font-black text-[9px] uppercase tracking-[0.2em] bg-[#F0F9F4] px-4 py-1 rounded-full border border-[#0b6b4f]/10">{t.verifiedPatient}</span>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ID: {user.arogyadathaId}</span>
+                                        <span className="text-[#0b6b4f] font-black text-[9px] capitalize tracking-[0.2em] bg-[#F0F9F4] px-4 py-1 rounded-full border border-[#0b6b4f]/10">{t.verifiedPatient}</span>
+                                        <span className="text-[10px] font-bold text-gray-400 capitalize tracking-widest">ID: {user.arogyadathaId}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -2274,17 +2364,17 @@ export default function App() {
                                     <div className="flex items-center gap-4 mb-10 border-b border-gray-50 pb-8">
                                       <div className="w-12 h-12 rounded-[18px] bg-emerald-50 text-[#0b6b4f] flex items-center justify-center shadow-inner"><Settings className="w-6 h-6" /></div>
                                       <div>
-                                        <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">{t.accountSettings}</h3>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Update your profile information</p>
+                                        <h3 className="text-xl font-black text-slate-900 capitalize tracking-tight leading-none mb-1">{t.accountSettings}</h3>
+                                        <p className="text-[10px] font-bold text-gray-400 capitalize tracking-widest">Update your profile information</p>
                                       </div>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                       <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                                        <label className="text-[10px] font-black text-gray-400 capitalize tracking-widest ml-1">Full Name</label>
                                         <input type="text" defaultValue={user.fullName} className="w-full h-14 bg-gray-50/50 border border-transparent rounded-[20px] px-6 text-sm font-black text-slate-800 outline-none" />
                                       </div>
                                       <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+                                        <label className="text-[10px] font-black text-gray-400 capitalize tracking-widest ml-1">Phone Number</label>
                                         <input type="text" defaultValue={user.phoneNumber} className="w-full h-14 bg-gray-50/50 border border-transparent rounded-[20px] px-6 text-sm font-black text-slate-800 outline-none" />
                                       </div>
                                     </div>
@@ -2298,7 +2388,7 @@ export default function App() {
                                 <ArrowLeft className="w-5 h-5" strokeWidth={3} />
                               </button>
                               <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-4">Privacy Policy</h2>
+                                <h2 className="text-2xl font-black text-slate-900 capitalize tracking-tighter mb-4">Privacy Policy</h2>
                                 <p className="text-sm text-slate-500 leading-relaxed">Your privacy is important to us. We collect data only to provide and improve our clinical services.</p>
                               </div>
                             </div>
@@ -2312,14 +2402,14 @@ export default function App() {
                               <div className="bg-[#0b6b4f] rounded-[24px] p-6 sm:p-12 text-white relative overflow-hidden mb-6">
                                 <div className="relative z-10">
                                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6"><FileText className="w-6 h-6 text-emerald-300" /></div>
-                                  <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight mb-2">Terms & Conditions</h1>
-                                  <p className="text-emerald-100/60 font-bold uppercase tracking-widest text-[10px] sm:text-[12px]">Legal Compliance V2.4</p>
+                                  <h1 className="text-3xl sm:text-5xl font-black capitalize tracking-tight mb-2">Terms & Conditions</h1>
+                                  <p className="text-emerald-100/60 font-bold capitalize tracking-widest text-[10px] sm:text-[12px]">Legal Compliance V2.4</p>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-32">
                                   {/* Sidebar Navigation */}
                                   <div className="lg:col-span-3 space-y-4">
                                     <div className="p-4 border-b border-gray-50 mb-2">
-                                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">On This Page</p>
+                                      <p className="text-[10px] font-bold text-gray-400 capitalize tracking-[0.2em]">On This Page</p>
                                     </div>
                                     <div className="space-y-1">
                                       {[
@@ -2330,7 +2420,7 @@ export default function App() {
                                         <button
                                           key={i}
                                           onClick={() => document.getElementById(`terms-section-${i}`)?.scrollIntoView({ behavior: 'smooth' })}
-                                          className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-tight transition-all ${i === 0 ? 'bg-[#F0F9F4] text-[#0b6b4f]' : 'text-gray-400 hover:text-slate-600 hover:bg-gray-50'}`}
+                                          className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-bold capitalize tracking-tight transition-all ${i === 0 ? 'bg-[#F0F9F4] text-[#0b6b4f]' : 'text-gray-400 hover:text-slate-600 hover:bg-gray-50'}`}
                                         >
                                           <div className="flex items-center gap-3">
                                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] ${i === 0 ? 'bg-[#0b6b4f] text-white' : 'bg-gray-100 text-gray-400'}`}>{String(i + 1).padStart(2, '0')}</span>
@@ -2359,7 +2449,7 @@ export default function App() {
                                       <div className="flex gap-8">
                                         <div className="w-14 h-14 bg-emerald-50 text-[#0b6b4f] rounded-[18px] flex items-center justify-center shrink-0 font-extrabold text-xl group-hover:bg-[#0b6b4f] group-hover:text-white transition-all">{section.num}</div>
                                         <div className="flex-1">
-                                          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 uppercase tracking-tight mb-4">{section.title}</h3>
+                                          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 capitalize tracking-tight mb-4">{section.title}</h3>
                                           <p className="text-sm sm:text-base font-medium text-slate-500 leading-relaxed">{section.desc}</p>
                                         </div>
                                       </div>
@@ -2421,7 +2511,7 @@ export default function App() {
                     <div className="p-12 text-center bg-white rounded-[32px] shadow-xl border border-gray-100 max-w-lg mx-auto mt-20">
                       <Heart className="w-16 h-16 text-[#10B981] mx-auto mb-6" />
                       <h1 className="text-3xl font-black text-[#1F2937] tracking-tight mb-2">{t.welcomeMsg}</h1>
-                      <p className="text-[#6B7280] font-bold uppercase tracking-widest text-xs">{t.premiumPortal}</p>
+                      <p className="text-[#6B7280] font-bold capitalize tracking-widest text-xs">{t.premiumPortal}</p>
                     </div>
                   )}
                 </div>
@@ -2470,7 +2560,7 @@ export default function App() {
           </React.Suspense>
         )}
 
-        {/* ── AROGYADATHA CHATBOT FAB ───────────────────────────────────── */}
+        {/* ── Arogyadatha CHATBOT FAB ───────────────────────────────────── */}
         {user && user.role === 'patient' && !showChatbot && (
           <button
             onClick={() => setShowChatbot(true)}
@@ -2485,7 +2575,7 @@ export default function App() {
           </button>
         )}
 
-        {/* ── AROGYADATHA CHATBOT OVERLAY ───────────────────────────────── */}
+        {/* ── Arogyadatha CHATBOT OVERLAY ───────────────────────────────── */}
         <AnimatePresence>
           {showChatbot && user && (
             <React.Suspense fallback={null}>

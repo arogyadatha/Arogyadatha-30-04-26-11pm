@@ -80,9 +80,9 @@ export function AISection({ config }: { config?: any }) {
   ];
 
   return (
-    <section id="ai" className="py-8 bg-white border-t border-gray-100">
+    <section id="ai" className="py-4 bg-white border-t border-gray-100">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="w-full space-y-4 text-left">
+        <div className="w-full space-y-2 text-left">
           <div className="space-y-1">
             <h2 className="text-[#064e3b] font-black text-lg tracking-[0.2em] border-l-4 border-[#064e3b] pl-4">
               {toTitleCase(config?.headings?.ai || "Personalized Ai")}

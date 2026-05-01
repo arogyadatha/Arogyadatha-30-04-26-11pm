@@ -45,9 +45,9 @@ const features = [
 
 export function FeaturesSection({ config }: { config?: any }) {
   return (
-    <section id="services" className="py-12 bg-white border-t border-gray-100 overflow-hidden">
+    <section id="services" className="py-4 bg-white border-t border-gray-100 overflow-hidden">
       <div className="container mx-auto px-2 md:px-4">
-        <div className="text-left mb-8 animate-in fade-in slide-in-from-left-4 duration-700">
+        <div className="text-left mb-2 animate-in fade-in slide-in-from-left-4 duration-700">
           <h2 className="text-xl md:text-2xl font-black text-[#064e3b] uppercase tracking-[0.1em] border-l-4 border-[#064e3b] pl-3">Our Services</h2>
         </div>
 

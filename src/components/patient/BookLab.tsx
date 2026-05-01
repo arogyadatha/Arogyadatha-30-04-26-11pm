@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, MapPin, Upload, FileText, X, FlaskConical, CheckCircle2, ChevronDown, ChevronUp, 
   Activity, Star, Clock, Beaker, Bell, Menu, ShieldCheck, Download, Eye, Edit3, Trash2, 
-  Cpu, ArrowRight, Share2, ClipboardList, ChevronRight, Plus, SlidersHorizontal, Microscope
+  Cpu, ArrowRight, Share2, ClipboardList, ChevronRight, Plus, SlidersHorizontal, Microscope,
+  Phone, Loader2
 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -236,28 +237,36 @@ export default function BookLab({ user, userCases, onBack, t }: BookLabProps) {
                     <motion.div 
                       key={lab.uid}
                       layout
-                      className={`bg-white rounded-[24px] border-2 transition-all overflow-hidden ${isExpanded ? 'border-emerald-500 shadow-xl shadow-emerald-500/10' : 'border-slate-50 hover:border-emerald-500/20 shadow-sm'}`}
+                      className={`bg-white rounded-[20px] border-2 transition-all overflow-hidden ${isExpanded ? 'border-emerald-500 shadow-lg' : 'border-slate-50 hover:border-emerald-500/20 shadow-sm'}`}
                     >
                        <div 
                          onClick={() => handleLabSelection(lab)}
-                         className={`p-5 flex items-center justify-between gap-4 cursor-pointer ${lab.isAvailable === false ? 'opacity-60 grayscale' : ''}`}
+                         className={`p-3.5 flex items-center justify-between gap-3 cursor-pointer ${lab.isAvailable === false ? 'opacity-60 grayscale' : ''}`}
                        >
-                          <div className="flex items-center gap-4 flex-1">
-                             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#0b0f19] text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg">
+                          <div className="flex items-center gap-3 flex-1">
+                             <div className="w-12 h-12 bg-[#0b0f19] text-white rounded-xl flex items-center justify-center text-lg font-black shrink-0">
                                 {lab.labName?.[0] || lab.fullName?.[0]}
                              </div>
-                             <div>
-                                <h4 className="text-[16px] sm:text-[18px] font-black text-slate-900 uppercase tracking-tight">{lab.labName || lab.fullName}</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mt-1">
-                                   <MapPin className="w-3 h-3 text-[#0b6b4f]" />
-                                   {lab.city || 'Regional'} • {lab.address || 'Main Center'}
-                                </p>
+                             <div className="min-w-0">
+                                <h4 className="text-[14px] font-black text-slate-900 tracking-tight truncate leading-tight capitalize">{lab.labName || lab.fullName}</h4>
+                                <div className="space-y-0.5 mt-1">
+                                  <p className="text-[9px] font-bold text-slate-500 tracking-wide flex items-center gap-1.5 leading-none capitalize">
+                                     <MapPin className="w-2.5 h-2.5 text-emerald-600" />
+                                     <span className="truncate">{lab.city || 'Regional'} • {lab.address || 'Main Center'}</span>
+                                  </p>
+                                  {lab.phoneNumber && (
+                                    <p className="text-[9px] font-bold text-emerald-600 tracking-wide flex items-center gap-1.5 leading-none">
+                                       <Phone className="w-2.5 h-2.5" />
+                                       {lab.phoneNumber}
+                                    </p>
+                                  )}
+                                </div>
                              </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                             <button className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-                                {isExpanded ? 'View Less' : 'View Details'}
-                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                          <div className="flex items-center gap-2 shrink-0">
+                             <button className="text-[9px] font-black text-emerald-600 tracking-widest flex items-center gap-0.5 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                                {isExpanded ? 'Less' : 'View'}
+                                <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                              </button>
                           </div>
                        </div>
@@ -270,57 +279,57 @@ export default function BookLab({ user, userCases, onBack, t }: BookLabProps) {
                              exit={{ height: 0, opacity: 0 }}
                              className="border-t-2 border-slate-50 bg-slate-50/30"
                            >
-                             <div className="p-6 space-y-6">
+                             <div className="p-4 space-y-5">
                                 {/* ACTION BUTTONS */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-2">
                                    <button 
                                      onClick={() => setShowBookingModal(lab)}
-                                     className="flex items-center justify-center gap-3 p-4 bg-white border-2 border-emerald-100 rounded-2xl text-[11px] font-black text-emerald-700 uppercase tracking-widest shadow-sm hover:bg-emerald-50 transition-all"
+                                     className="flex flex-col items-center justify-center gap-1.5 p-3 bg-white border border-emerald-100 rounded-xl text-[9px] font-black text-emerald-700 uppercase tracking-widest shadow-sm hover:bg-emerald-50 transition-all"
                                    >
-                                      <Upload className="w-4 h-4" /> Upload Prescription
+                                      <Upload className="w-3.5 h-3.5" /> <span>Prescription</span>
                                    </button>
-                                   <button className="flex items-center justify-center gap-3 p-4 bg-white border-2 border-slate-100 rounded-2xl text-[11px] font-black text-slate-400 uppercase tracking-widest shadow-sm opacity-50 cursor-not-allowed">
-                                      <FileText className="w-4 h-4" /> Download Prices
+                                   <button className="flex flex-col items-center justify-center gap-1.5 p-3 bg-white border border-slate-100 rounded-xl text-[9px] font-black text-slate-400 uppercase tracking-widest shadow-sm opacity-50 cursor-not-allowed">
+                                      <FileText className="w-3.5 h-3.5" /> <span>Prices</span>
                                    </button>
                                 </div>
 
                                 {/* TEST CATALOG */}
-                                <div className="space-y-3">
-                                   <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Available Tests & Pricing</h5>
+                                <div className="space-y-2">
+                                   <h5 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">Available Tests</h5>
                                    {availableTests.length > 0 ? (
-                                      <div className="grid grid-cols-1 gap-2">
+                                      <div className="grid grid-cols-1 gap-1.5">
                                          {availableTests.map((test) => (
-                                           <div key={test.id} className="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between shadow-sm group hover:border-emerald-500/30 transition-all">
-                                              <div className="flex items-center gap-3">
-                                                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                                                    <Microscope className="w-4 h-4" />
+                                           <div key={test.id} className="bg-white p-3 rounded-xl border border-slate-100 flex items-center justify-between shadow-sm group hover:border-emerald-500/30 transition-all">
+                                              <div className="flex items-center gap-2.5">
+                                                 <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                                                    <Microscope className="w-3.5 h-3.5" />
                                                  </div>
-                                                 <span className="text-[12px] font-black text-slate-900 uppercase tracking-tight">{test.testName}</span>
+                                                 <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{test.testName}</span>
                                               </div>
-                                              <div className="flex items-center gap-4">
-                                                 <span className="text-sm font-black text-slate-900">₹{test.price}</span>
+                                              <div className="flex items-center gap-3">
+                                                 <span className="text-[12px] font-black text-slate-900">₹{test.price}</span>
                                                  <button 
                                                    onClick={() => { setSelectedTests([{ testName: test.testName, price: test.price }]); setShowBookingModal(lab); }}
-                                                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all"
+                                                   className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-[8px] font-black uppercase tracking-widest shadow-md shadow-emerald-200 active:scale-95 transition-all"
                                                  >
-                                                   Select
+                                                   Book
                                                  </button>
                                               </div>
                                            </div>
                                          ))}
                                       </div>
                                    ) : (
-                                      <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-2xl">
-                                         <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">No online tests listed</p>
+                                      <div className="text-center py-4 border-2 border-dashed border-slate-100 rounded-xl">
+                                         <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">No online tests listed</p>
                                       </div>
                                    )}
                                 </div>
 
                                 <button 
                                   onClick={() => setShowBookingModal(lab)}
-                                  className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+                                  className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] tracking-widest shadow-lg active:scale-95 transition-all"
                                 >
-                                   Proceed with Order
+                                   Order Sample Collection
                                 </button>
                              </div>
                            </motion.div>
@@ -405,35 +414,32 @@ export default function BookLab({ user, userCases, onBack, t }: BookLabProps) {
         {showBookingModal && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBookingModal(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} className="relative w-full max-w-2xl bg-white rounded-[56px] shadow-[0_50px_120px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[95vh] text-slate-900">
-               <div className="p-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/20">
-                  <div className="flex items-center gap-6">
-                     <div className="w-14 h-14 bg-slate-900 text-white rounded-[20px] flex items-center justify-center shadow-xl">
-                        <FlaskConical className="w-7 h-7 text-emerald-400" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-900">
+               <div className="p-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                  <div className="flex items-center gap-3">
+                     <div className="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <FlaskConical className="w-4 h-4" />
                      </div>
                      <div>
-                        <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">{t.finalizeOrder}</h3>
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">Safe & Secure transmission</p>
+                        <h3 className="text-lg font-bold text-emerald-600 capitalize tracking-tight">{t.finalizeOrder}</h3>
+                        <p className="text-[7px] font-medium text-slate-400 capitalize tracking-widest">Secure transmission</p>
                      </div>
                   </div>
-                  <button onClick={() => setShowBookingModal(null)} className="w-14 h-14 rounded-[24px] bg-white border-2 border-slate-50 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all shadow-sm"><X /></button>
+                  <button onClick={() => setShowBookingModal(null)} className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all"><X className="w-4 h-4" /></button>
                </div>
 
-               <div className="p-10 space-y-10 overflow-y-auto no-scrollbar">
+               <div className="p-5 space-y-5 overflow-y-auto no-scrollbar">
                   {/* CASE SELECTION */}
-                  <div className="space-y-4">
-                     <div className="flex items-center justify-between px-6">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">{t.attachToJourney}</p>
-                        <button 
-                          onClick={() => setShowCreateCaseModal(true)}
-                          className="text-[9px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1 hover:underline"
-                        >
-                          <Plus className="w-3 h-3" /> {t.createNew || "Create New"}
+                  <div className="space-y-1.5">
+                     <div className="flex items-center justify-between px-1">
+                        <p className="text-[7px] font-bold text-slate-400 capitalize tracking-[0.2em]">{t.attachToJourney}</p>
+                        <button onClick={() => setShowCreateCaseModal(true)} className="text-[7px] font-bold text-emerald-600 capitalize tracking-widest flex items-center gap-1 hover:underline">
+                          <Plus className="w-2 h-2" /> {t.createNew || "New"}
                         </button>
                      </div>
                      <div className="relative">
                         <select 
-                          className="w-full h-24 bg-slate-50 border-4 border-transparent focus:border-emerald-500/10 rounded-[32px] px-10 font-black text-slate-900 uppercase tracking-tight outline-none appearance-none cursor-pointer text-lg"
+                          className="w-full h-12 bg-slate-50 border border-slate-100 rounded-xl px-4 font-medium text-slate-900 capitalize tracking-tight outline-none appearance-none cursor-pointer text-[13px]"
                           value={selectedCaseId}
                           onChange={(e) => setSelectedCaseId(e.target.value)}
                         >
@@ -442,57 +448,54 @@ export default function BookLab({ user, userCases, onBack, t }: BookLabProps) {
                              <option key={c.id} value={c.caseId}>{c.caseId} • {c.caseName}</option>
                            ))}
                         </select>
-                        <ChevronDown className="absolute right-10 top-1/2 -translate-y-1/2 w-8 h-8 text-slate-300 pointer-events-none" />
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                      </div>
                   </div>
 
                   {/* TEST RECAP */}
-                  <div className="space-y-4">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] pl-6">{t.orderBreakdown}</p>
-                     <div className="bg-emerald-50 rounded-[40px] p-10 space-y-6">
+                  <div className="space-y-1.5">
+                     <p className="text-[7px] font-bold text-slate-400 capitalize tracking-[0.2em] pl-1">{t.orderBreakdown}</p>
+                     <div className="bg-emerald-50/50 rounded-2xl p-4 space-y-2.5 border border-emerald-100/30">
                         {selectedTests.map((t, i) => (
-                          <div key={i} className="flex justify-between items-center border-b border-emerald-100/50 pb-6 last:border-0 last:pb-0">
-                             <p className="text-xl font-black text-slate-900 uppercase tracking-tight">{t.testName}</p>
-                             <p className="text-3xl font-black text-emerald-600 tracking-tighter leading-none">₹{t.price}</p>
+                          <div key={i} className="flex justify-between items-center border-b border-emerald-100/30 pb-2 last:border-0 last:pb-0">
+                             <p className="text-[13px] font-medium text-slate-700 capitalize tracking-tight">{t.testName}</p>
+                             <p className="text-[15px] font-bold text-emerald-600 tracking-tighter">₹{t.price}</p>
                           </div>
                         ))}
                         {selectedTests.length === 0 && (
-                          <div className="text-center py-6">
-                             <FileText className="w-10 h-10 text-emerald-200 mx-auto mb-4" />
-                             <p className="text-sm font-black text-emerald-600 uppercase tracking-widest">Custom Prescription Fulfillment</p>
+                          <div className="text-center py-1">
+                             <p className="text-[9px] font-medium text-emerald-600 capitalize">Custom Prescription</p>
                           </div>
                         )}
-                        <div className="pt-6 mt-6 border-t-4 border-emerald-100 flex justify-between items-center">
-                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.grandTotal}</p>
-                           <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none">₹{selectedTests.reduce((acc, curr) => acc + (curr.price || 0), 0)}</p>
+                        <div className="pt-2 mt-2 border-t border-emerald-100/50 flex justify-between items-center">
+                           <p className="text-[7px] font-bold text-slate-400 capitalize tracking-widest">{t.grandTotal}</p>
+                           <p className="text-xl font-bold text-slate-900 tracking-tighter">₹{selectedTests.reduce((acc, curr) => acc + (curr.price || 0), 0)}</p>
                         </div>
                      </div>
-                  </div>
-
-                  {/* PRESCRIPTION UPLOAD */}
-                  <div className="space-y-4">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] pl-6">Prescription Document (Optional)</p>
-                     <label className="flex flex-col items-center justify-center w-full h-48 border-4 border-dashed border-slate-100 rounded-[40px] bg-slate-50/50 cursor-pointer hover:bg-emerald-50 transition-all group overflow-hidden relative">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6 relative z-10">
-                           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl mb-6 group-hover:scale-110 transition-transform">
-                              <Upload className="w-8 h-8 text-emerald-500" />
+                                  {/* PRESCRIPTION UPLOAD */}
+                  <div className="space-y-1.5">
+                     <p className="text-[7px] font-bold text-slate-400 capitalize tracking-[0.2em] pl-1">Prescription (Optional)</p>
+                     <label className="flex flex-col items-center justify-center w-full h-24 border border-dashed border-slate-200 rounded-xl bg-slate-50/50 cursor-pointer hover:bg-emerald-50 transition-all group overflow-hidden relative">
+                        <div className="flex flex-col items-center justify-center relative z-10">
+                           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm mb-1.5 group-hover:scale-105 transition-transform">
+                              <Upload className="w-4 h-4 text-emerald-500" />
                            </div>
-                           <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{file ? file.name : 'Drop file or tap to select'}</p>
+                           <p className="text-[7px] font-medium text-slate-400 capitalize tracking-[0.1em]">{file ? file.name : 'Tap to upload'}</p>
                         </div>
                         <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
                      </label>
                   </div>
                </div>
-
-               <div className="p-10 bg-slate-50/80 border-t border-slate-100 flex flex-col gap-4">
+ 
+               <div className="p-5 bg-white border-t border-slate-50">
                   <Button 
                     onClick={handleBooking}
                     disabled={uploading}
-                    className="w-full h-24 bg-slate-900 text-white rounded-[32px] font-black uppercase text-sm tracking-[0.4em] shadow-[0_20px_60px_rgba(0,0,0,0.3)] active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold capitalize text-[13px] tracking-tight shadow-md active:scale-95 transition-all disabled:opacity-50"
                   >
                     {uploading ? t.transmitting : t.dispatchRequest}
                   </Button>
-               </div>
+               </div>    </div>
             </motion.div>
           </div>
         )}

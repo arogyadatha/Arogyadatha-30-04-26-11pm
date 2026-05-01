@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Leaf, Menu, X, MessageCircle } from "lucide-react";
+import { Leaf, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WhatsAppIcon } from "./WhatsAppIcon";
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -71,40 +72,51 @@ export function Navbar({ onLoginClick, config }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-[#064e3b] border-t border-white/10 md:hidden animate-in fade-in slide-in-from-top-4 duration-300 shadow-2xl">
-          <nav className="flex flex-col p-6 gap-1 bg-[#064e3b]/95 backdrop-blur-md">
-            {[
-              { name: "Home", id: "home" },
-              { name: "What We Do", id: "what-we-do" },
-              { name: "Solutions", id: "solutions" },
-              { name: "Services", id: "services" },
-              { name: "AI", id: "ai" },
-              { name: "Team", id: "team" },
-              { name: "Careers", id: "collaboration" }
-            ].map((item) => (
-              <a 
-                key={item.id} 
-                href={`#${item.id}`}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-xs font-bold tracking-[0.2em] text-white/90 py-4 border-b border-white/5 hover:text-white transition-colors"
-              >
-                {toTitleCase(item.name)}
-              </a>
-            ))}
-            
-            <div className="flex flex-col gap-4 pt-4">
-              <Button 
-                onClick={() => window.open(WHATSAPP_LINK, "_blank")}
-                className="bg-[#064e3b] text-white font-black w-full py-6 text-sm tracking-widest flex items-center justify-center gap-2 transition-transform active:scale-95 border border-white/20"
-              >
-                <MessageCircle className="w-5 h-5" />
-                {toTitleCase(config?.buttons?.heroCta || "Join Community")}
-              </Button>
-            </div>
-          </nav>
-        </div>
+        <>
+          {/* Click-away overlay - closes menu when clicking anywhere else */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[1px] md:hidden" 
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          
+          <div className="absolute top-[85%] right-4 w-60 bg-[#064e3b] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right md:hidden">
+            <nav className="flex flex-col p-2">
+              {[
+                { name: "Home", id: "home" },
+                { name: "What We Do", id: "what-we-do" },
+                { name: "Solutions", id: "solutions" },
+                { name: "Services", id: "services" },
+                { name: "AI", id: "ai" },
+                { name: "Team", id: "team" },
+                { name: "Careers", id: "collaboration" }
+              ].map((item) => (
+                <a 
+                  key={item.id} 
+                  href={`#${item.id}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center px-4 py-3 text-[10px] font-black tracking-widest text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                >
+                  {toTitleCase(item.name)}
+                </a>
+              ))}
+              
+              <div className="mt-1 pt-2 border-t border-white/10 px-2 pb-2">
+                <button 
+                  onClick={() => {
+                    window.open(WHATSAPP_LINK, "_blank");
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-white text-[#064e3b] font-black py-3 rounded-xl text-[10px] tracking-widest flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95"
+                >
+                  <WhatsAppIcon className="w-4 h-4" />
+                  {toTitleCase(config?.buttons?.heroCta || "Join Community")}
+                </button>
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );

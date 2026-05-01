@@ -1,5 +1,6 @@
 import React from "react";
-import { Star, MessageCircle } from "lucide-react";
+import { Star } from "lucide-react";
+import { WhatsAppIcon } from "./WhatsAppIcon";
 
 export function ImpactSection({ config }: { config?: any }) {
   const WHATSAPP_LINK = "https://chat.whatsapp.com/CsvbKgcYB3qE2dMpSxNoAR?mode=gi_t";
@@ -20,12 +21,12 @@ export function ImpactSection({ config }: { config?: any }) {
   ];
 
   return (
-    <section id="collaboration" className="py-12 bg-white border-t border-gray-100">
+    <section id="collaboration" className="py-4 bg-white border-t border-gray-100">
       <div className="container mx-auto px-6">
-        <div className="space-y-7">
+        <div className="space-y-4">
           
           {/* Header Title Section */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <h2 className="text-[#064e3b] font-black text-[clamp(8.5px,2.8vw,18px)] tracking-[0.15em] border-l-4 border-[#064e3b] pl-4 whitespace-nowrap">
               {toTitleCase("Open for Partnership & Collaboration")}
             </h2>
@@ -56,7 +57,7 @@ export function ImpactSection({ config }: { config?: any }) {
                     onClick={() => window.open(config?.buttons?.heroCtaLink || WHATSAPP_LINK, "_blank")}
                     className="w-full flex items-center justify-center gap-2 py-3 bg-white text-[#064e3b] font-bold rounded-xl shadow-lg hover:bg-gray-50 transition-all tracking-widest text-[10px] border-none"
                   >
-                    <MessageCircle className="w-4 h-4 fill-[#064e3b]" /> {toTitleCase(config?.buttons?.whatsappSupport || "Whatsapp Support")}
+                    <WhatsAppIcon className="w-4 h-4 fill-[#064e3b]" /> {toTitleCase(config?.buttons?.whatsappSupport || "Whatsapp Support")}
                   </button>
                 </div>
               </div>

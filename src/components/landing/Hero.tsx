@@ -1,5 +1,6 @@
 import React from "react";
-import { MessageCircle, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { WhatsAppIcon } from "./WhatsAppIcon";
 
 export function Hero({ config }: { config?: any }) {
   const WHATSAPP_LINK = "https://chat.whatsapp.com/CsvbKgcYB3qE2dMpSxNoAR?mode=gi_t";
@@ -43,7 +44,7 @@ export function Hero({ config }: { config?: any }) {
             rel="noopener noreferrer"
             className="group flex items-center justify-center gap-2 px-6 sm:px-6 py-3 sm:py-2.5 bg-[#064e3b] text-white font-black text-xs sm:text-sm tracking-tight rounded-xl shadow-[0_10px_20px_-5px_rgba(6,78,59,0.4)] hover:scale-[1.01] active:scale-95 transition-all duration-300 w-full sm:w-fit mx-auto min-w-[240px] sm:min-w-0"
           >
-            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-white group-hover:rotate-12 transition-transform" />
+            <WhatsAppIcon className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-white group-hover:rotate-12 transition-transform" />
             {toTitleCase(config?.buttons?.heroCta || "Join Arogyadatha Community")}
             <ChevronRight className="w-4 h-4 sm:w-4 sm:h-4 ml-1 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
           </a>
